@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <title>Marcador Pádel - Tiempo Real</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <style>
+    /* --- Estilos (como la versión anterior) --- */
+    html,body { height: 100%; margin: 0; font-family: monospace; background: #000; }
+    body {
+      display:flex; align-items:center; justify-content:center;
+      background: url('https://images.unsplash.com/photo-1623961207223-40c1fae9a60c?ixlib=rb-4.0.3&auto=format&fit=crop&w=1400&q=80') center/cover no-repeat;
+      position: relative;
+    }
+    body::before{
+      content:""; position:absolute; inset:0;
+      background: rgba(0,0,0,0.7); backdrop-filter: blur(6px); z-index:0;
+    }
+    .container{ z-index:1; display:flex; flex-direction:column; align-items:center; gap:20px; width:100%; max-width:980px; padding:20px; box-sizing:border-box;}
+    .marcador{
+      display:flex; gap:40px; padding:28px; border-radius:18px; background:rgba(0,0,0,0.85);
+      align-items:center; justify-content:center; width:100%;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+    }
+    .equipo{ display:flex; flex-direction:column; align-items:center; min-width:240px; }
+    .titulo{ font-size:2.4rem; color:white; letter-spacing:3px; margin-bottom:6px; }
+    .score{ font-size:5.5rem; margin-bottom:10px; text-shadow:0 0 12px currentColor,0 0 30px currentColor; }
+    .home{ color: #ff3b3b; }
+    .guest{ color: #6ff07a; }
+    .sets{ display:flex; gap:16px; }
+    .set{ width:66px; height:66px; display:flex; align-items:center; justify-content:center; border-radius:10px; background:#111; border:2px solid #333; font-size:2rem; text-shadow:0 0 12px currentColor; }
+    .controls{ display:flex; gap:14px; flex-wrap:wrap; justify-content:center; margin-top:12px; }
+    button { padding:10px 18px; font-size:1.05rem; border-radius:8px; border:none; cursor:pointer; font-weight:700; }
+    .btn-home { background:#ff3b3b; color:white; box-shadow:0 0 16px #ff3b3b;}
+    .btn-guest { background:#6ff07a; color:#000; box-shadow:0 0 16px #6ff07a;}
+    .btn-reset { background:#555; color:#fff; box-shadow:none; }
+    .footer-note{ color:#ccc; font-size:0.9rem; text-align:center; margin-top:6px;}
+    @media (max-width:700px){
+      .marcador{ flex-direction:column; gap:18px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="marcador">
+      <!-- HOME -->
+      <div class="equipo">
+        <div class="titulo">HOME</div>
+        <div id="scoreHome" class="score home">0</div>
+        <div class="sets">
+          <div id="setHome1" class="set home">0</div>
+          <div id="setHome2" class="set home">0</div>
+          <div id="setHome3" class="set home">0</div>
+        </div>
+      </div>
+
+      <!-- GUEST -->
+      <div class="equipo">
+        <div class="titulo">GUEST</div>
+        <div id="scoreGuest" class="score guest">0</div>
+        <div class="sets">
+          <div id="setGuest1" class="set guest">0</div>
+          <div id="setGuest2" class="set guest">0</div>
+          <div id="setGuest3" class="set guest">0</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="controls">
+      <button class="btn-home" onclick="changePoint('home', +1)">+ HOME</button>
+      <button class="btn-home" onclick="changePoint('home', -1)">- HOME</button>
+      <button class="btn-guest" onclick="changePoint('guest', +1)">+ GUEST</button>
+      <button class="btn-guest" onclick="changePoint('guest', -1)">- GUEST</button>
+      <button class="btn-reset" onclick="resetAll()">🔁 Reset</button>
+    </div>
+
+    <div class="footer-note">Conexión en tiempo real vía Firebase Realtime Database. Cualquier persona con el enlace puede ver/editar simultáneamente.</div>
+  </div>
+
+  <!-- Firebase SDK v8 (namespaced, simple para este ejemplo) -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
+  <script>
+    /*********************** 1) PEGA TU CONFIGURACIÓN DE FIREBASE AQUÍ *************************
+     * Ve a Firebase Console > Configuración del proyecto > Tus apps > SDK
+     * Copia el objeto config y pégalo abajo (sin comillas)
+     ***************************************************************************************/
+    var firebaseConfig = {
+      apiKey: "TU_API_KEY",
+      authDomain: "TU_AUTH_DOMAIN",
+      databaseURL: "https://TU_PROJECT.firebaseio.com",
+      projectId: "TU_PROJECT_ID",
+      storageBucket: "TU_BUCKET.appspot.com",
+      messagingSenderId: "SENDER_ID",
+      appId: "APP_ID"
+    };
+    // -----------------------------------------------------------------------------------------
+    // Inicializa Firebase
+    firebase.initializeApp(firebaseConfig);
+    var db = firebase.database();
+    var ref = db.ref('padel/marcador'); // ruta donde guardamos el estado
+
+    // Estado por defecto (estructura en la DB)
+    const defaultState = {
+      indexHome: 0,
+      indexGuest: 0,
+      setsHome: [0,0,0],
+      setsGuest: [0,0,0],
+      setActual: 0
+    };
+
+    // Inicializa la base si no existe
+    ref.once('value').then(snap => {
+      if (!snap.exists()) {
+        ref.set(defaultState);
+      }
+    });
+
+    // Escucha cambios en tiempo real y actualiza UI
+    ref.on('value', snap => {
+      const state = snap.val();
+      if (!state) return;
+      updateUI(state);
+    });
+
+    // Map de progresión de puntos
+    const puntos = [0,15,30,40,"P"];
+
+    function updateUI(state){
+      // indexes a mostrar
+      const ih = state.indexHome ?? 0;
+      const ig = state.indexGuest ?? 0;
+      document.getElementById('scoreHome').textContent = puntos[ih];
+      document.getElementById('scoreGuest').textContent = puntos[ig];
+
+      // sets
+      const sh = state.setsHome || [0,0,0];
+      const sg = state.setsGuest || [0,0,0];
+      for(let i=0;i<3;i++){
+        document.getElementById('setHome'+(i+1)).textContent = sh[i];
+        document.getElementById('setGuest'+(i+1)).textContent = sg[i];
+      }
+    }
+
+    /********** Funciones que modifican el estado en la DB (usando transaction para evitar conflictos) **********/
+    function changePoint(equipo, delta){
+      // Si delta es +1 o -1 (sumar o restar puntos del score).
+      // Para sumar avanzamos en la progresion; si llegamos a "P" (ultimo), convertimos en juego y sumamos set (según reglas).
+      // Para restar disminuimos el index si >0.
+      ref.transaction(curr => {
+        if (!curr) curr = JSON.parse(JSON.stringify(defaultState));
+
+        // si ya pasamos los 3 sets no hacemos nada
+        if (curr.setActual >= 3) return curr;
+
+        if (delta > 0) {
+          if (equipo === 'home') {
+            if (curr.indexHome < puntos.length - 1) {
+              curr.indexHome++;
+            } else {
+              // llegó al punto -> reinicia puntos y sumar juego en setActual si permitido
+              // solo sumar set si en ese recuadro ninguno llegó a 6
+              if (curr.setsHome[curr.setActual] < 6 && curr.setsGuest[curr.setActual] < 6) {
+                curr.setsHome[curr.setActual]++;
+                // si alcanza 6, avanzar de set
+                if (curr.setsHome[curr.setActual] === 6) {
+                  curr.setActual = Math.min(3, curr.setActual + 1);
+                }
+              }
+              curr.indexHome = 0;
+              curr.indexGuest = 0;
+            }
+          } else {
+            if (curr.indexGuest < puntos.length - 1) {
+              curr.indexGuest++;
+            } else {
+              if (curr.setsGuest[curr.setActual] < 6 && curr.setsHome[curr.setActual] < 6) {
+                curr.setsGuest[curr.setActual]++;
+                if (curr.setsGuest[curr.setActual] === 6) {
+                  curr.setActual = Math.min(3, curr.setActual + 1);
+                }
+              }
+              curr.indexHome = 0;
+              curr.indexGuest = 0;
+            }
+          }
+        } else {
+          // delta negativo: restar puntos (solo en score, no en los sets)
+          if (equipo === 'home') {
+            if (curr.indexHome > 0) curr.indexHome--;
+          } else {
+            if (curr.indexGuest > 0) curr.indexGuest--;
+          }
+        }
+        return curr;
+      }, function(error, committed, snapshot){
+        if (error) {
+          console.error("Error en transaction:", error);
+        }
+      });
+    }
+
+    // Reseteo total (escribe el estado por defecto en la DB)
+    function resetAll(){
+      if (!confirm("¿Seguro quieres resetear todo el marcador?")) return;
+      ref.set(defaultState).then(()=> {
+        console.log("Marcador reseteado");
+      }).catch(err => console.error(err));
+    }
+
+  </script>
+</body>
+</html>
