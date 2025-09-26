@@ -108,6 +108,15 @@
 </head>
 <body>
 
+  <!-- 🔐 Protección por contraseña -->
+  <script>
+    const clave = prompt("🔐 Ingrese la clave para acceder:");
+    if (clave !== "1234") {
+      document.body.innerHTML = "<h1 style='color:white; text-align:center; margin-top:50px;'>⛔ Acceso denegado</h1>";
+      throw new Error("Acceso denegado");
+    }
+  </script>
+
   <div class="marcador">
     <div class="equipo">
       <div class="titulo">HOME</div>
@@ -138,12 +147,11 @@
     <button class="resetBtn" onclick="resetear()">RESET</button>
   </div>
 
-  <!-- Firebase SDK v8 (compatibles con HTML sin bundler) -->
+  <!-- Firebase SDK v8 -->
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
   <script>
-    // Configuración de tu Firebase
     const firebaseConfig = {
       apiKey: "AIzaSyDpSnx0D9b7KX4g0bhy4X8zExhrWPJwZbw",
       authDomain: "contador-de-padel.firebaseapp.com",
@@ -155,23 +163,22 @@
       measurementId: "G-49KZNXWMTY"
     };
 
-    // Inicializar Firebase
     const app = firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    const puntos = [0,15,30,40,"P"];
+    const puntos = [0, 15, 30, 40, "P"];
     let indexHome = 0;
     let indexGuest = 0;
-    let setsHome = [0,0,0];
-    let setsGuest = [0,0,0];
+    let setsHome = [0, 0, 0];
+    let setsGuest = [0, 0, 0];
     let setActual = 0;
 
     function actualizarMarcador() {
       document.getElementById("scoreHome").textContent = puntos[indexHome];
       document.getElementById("scoreGuest").textContent = puntos[indexGuest];
-      for (let i=0; i<3; i++) {
-        document.getElementById("setHome"+(i+1)).textContent = setsHome[i];
-        document.getElementById("setGuest"+(i+1)).textContent = setsGuest[i];
+      for (let i = 0; i < 3; i++) {
+        document.getElementById("setHome" + (i + 1)).textContent = setsHome[i];
+        document.getElementById("setGuest" + (i + 1)).textContent = setsGuest[i];
       }
     }
 
@@ -196,21 +203,19 @@
 
     function sumar(equipo) {
       if (equipo === "home") {
-        if (indexHome < puntos.length-1) {
+        if (indexHome < puntos.length - 1) {
           indexHome++;
         } else {
           indexHome = 0;
           sumarJuego("home");
-          // Reiniciar puntos guest
           indexGuest = 0;
         }
       } else {
-        if (indexGuest < puntos.length-1) {
+        if (indexGuest < puntos.length - 1) {
           indexGuest++;
         } else {
           indexGuest = 0;
           sumarJuego("guest");
-          // Reiniciar puntos home
           indexHome = 0;
         }
       }
@@ -250,15 +255,14 @@
     function resetear() {
       indexHome = 0;
       indexGuest = 0;
-      setsHome = [0,0,0];
-      setsGuest = [0,0,0];
+      setsHome = [0, 0, 0];
+      setsGuest = [0, 0, 0];
       setActual = 0;
       syncData();
     }
 
     actualizarMarcador();
 
-    // Hacer funciones accesibles desde el HTML
     window.sumar = sumar;
     window.restar = restar;
     window.resetear = resetear;
