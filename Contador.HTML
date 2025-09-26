@@ -1,214 +1,257 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="utf-8" />
-  <title>Marcador Pádel - Tiempo Real</title>
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta charset="UTF-8">
+  <title>Marcador Pádel</title>
   <style>
-    /* --- Estilos (como la versión anterior) --- */
-    html,body { height: 100%; margin: 0; font-family: monospace; background: #000; }
     body {
-      display:flex; align-items:center; justify-content:center;
-      background: url('https://images.unsplash.com/photo-1623961207223-40c1fae9a60c?ixlib=rb-4.0.3&auto=format&fit=crop&w=1400&q=80') center/cover no-repeat;
+      margin: 0;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      background: url('https://images.unsplash.com/photo-1623961207223-40c1fae9a60c?ixlib=rb-4.0.3&auto=format&fit=crop&w=1400&q=80') no-repeat center center/cover;
       position: relative;
+      font-family: monospace;
     }
-    body::before{
-      content:""; position:absolute; inset:0;
-      background: rgba(0,0,0,0.7); backdrop-filter: blur(6px); z-index:0;
+
+    body::before {
+      content: "";
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.7);
+      backdrop-filter: blur(6px);
+      z-index: 0;
     }
-    .container{ z-index:1; display:flex; flex-direction:column; align-items:center; gap:20px; width:100%; max-width:980px; padding:20px; box-sizing:border-box;}
-    .marcador{
-      display:flex; gap:40px; padding:28px; border-radius:18px; background:rgba(0,0,0,0.85);
-      align-items:center; justify-content:center; width:100%;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+
+    .marcador {
+      display: flex;
+      gap: 60px;
+      padding: 30px 50px;
+      border-radius: 20px;
+      background: rgba(0,0,0,0.85);
+      box-shadow: 0 0 30px rgba(0,0,0,0.9);
+      z-index: 1;
     }
-    .equipo{ display:flex; flex-direction:column; align-items:center; min-width:240px; }
-    .titulo{ font-size:2.4rem; color:white; letter-spacing:3px; margin-bottom:6px; }
-    .score{ font-size:5.5rem; margin-bottom:10px; text-shadow:0 0 12px currentColor,0 0 30px currentColor; }
-    .home{ color: #ff3b3b; }
-    .guest{ color: #6ff07a; }
-    .sets{ display:flex; gap:16px; }
-    .set{ width:66px; height:66px; display:flex; align-items:center; justify-content:center; border-radius:10px; background:#111; border:2px solid #333; font-size:2rem; text-shadow:0 0 12px currentColor; }
-    .controls{ display:flex; gap:14px; flex-wrap:wrap; justify-content:center; margin-top:12px; }
-    button { padding:10px 18px; font-size:1.05rem; border-radius:8px; border:none; cursor:pointer; font-weight:700; }
-    .btn-home { background:#ff3b3b; color:white; box-shadow:0 0 16px #ff3b3b;}
-    .btn-guest { background:#6ff07a; color:#000; box-shadow:0 0 16px #6ff07a;}
-    .btn-reset { background:#555; color:#fff; box-shadow:none; }
-    .footer-note{ color:#ccc; font-size:0.9rem; text-align:center; margin-top:6px;}
-    @media (max-width:700px){
-      .marcador{ flex-direction:column; gap:18px; }
+
+    .equipo {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-width: 200px;
     }
+
+    .titulo {
+      font-size: 2.5em;
+      margin-bottom: 10px;
+      color: white;
+      letter-spacing: 3px;
+    }
+
+    .score {
+      font-size: 6em;
+      font-weight: bold;
+      letter-spacing: 5px;
+      margin-bottom: 15px;
+      text-shadow: 0 0 15px currentColor, 0 0 30px currentColor, 0 0 50px currentColor;
+    }
+
+    .home { color: red; }
+    .guest { color: lime; }
+
+    .sets {
+      display: flex;
+      gap: 20px;
+      margin-top: 10px;
+    }
+
+    .set {
+      font-size: 3em;
+      width: 60px;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid #444;
+      border-radius: 10px;
+      background: #111;
+      text-shadow: 0 0 15px currentColor, 0 0 30px currentColor;
+    }
+
+    .botones {
+      margin-top: 40px;
+      display: flex;
+      gap: 25px;
+      z-index: 1;
+    }
+
+    button {
+      padding: 12px 25px;
+      font-size: 1.2em;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: transform 0.2s ease;
+    }
+
+    button:hover {
+      transform: scale(1.1);
+    }
+
+    .homeBtn { background: red; color: white; box-shadow: 0 0 15px red; }
+    .guestBtn { background: lime; color: black; box-shadow: 0 0 15px lime; }
+    .resetBtn { background: orange; color: white; box-shadow: 0 0 15px orange; }
   </style>
 </head>
 <body>
-  <div class="container">
-    <div class="marcador">
-      <!-- HOME -->
-      <div class="equipo">
-        <div class="titulo">HOME</div>
-        <div id="scoreHome" class="score home">0</div>
-        <div class="sets">
-          <div id="setHome1" class="set home">0</div>
-          <div id="setHome2" class="set home">0</div>
-          <div id="setHome3" class="set home">0</div>
-        </div>
-      </div>
 
-      <!-- GUEST -->
-      <div class="equipo">
-        <div class="titulo">GUEST</div>
-        <div id="scoreGuest" class="score guest">0</div>
-        <div class="sets">
-          <div id="setGuest1" class="set guest">0</div>
-          <div id="setGuest2" class="set guest">0</div>
-          <div id="setGuest3" class="set guest">0</div>
-        </div>
+  <div class="marcador">
+    <div class="equipo">
+      <div class="titulo">HOME</div>
+      <div id="scoreHome" class="score home">0</div>
+      <div class="sets">
+        <div id="setHome1" class="set home">0</div>
+        <div id="setHome2" class="set home">0</div>
+        <div id="setHome3" class="set home">0</div>
       </div>
     </div>
 
-    <div class="controls">
-      <button class="btn-home" onclick="changePoint('home', +1)">+ HOME</button>
-      <button class="btn-home" onclick="changePoint('home', -1)">- HOME</button>
-      <button class="btn-guest" onclick="changePoint('guest', +1)">+ GUEST</button>
-      <button class="btn-guest" onclick="changePoint('guest', -1)">- GUEST</button>
-      <button class="btn-reset" onclick="resetAll()">🔁 Reset</button>
+    <div class="equipo">
+      <div class="titulo">GUEST</div>
+      <div id="scoreGuest" class="score guest">0</div>
+      <div class="sets">
+        <div id="setGuest1" class="set guest">0</div>
+        <div id="setGuest2" class="set guest">0</div>
+        <div id="setGuest3" class="set guest">0</div>
+      </div>
     </div>
-
-    <div class="footer-note">Conexión en tiempo real vía Firebase Realtime Database. Cualquier persona con el enlace puede ver/editar simultáneamente.</div>
   </div>
 
-  <!-- Firebase SDK v8 (namespaced, simple para este ejemplo) -->
-  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+  <div class="botones">
+    <button class="homeBtn" onclick="sumar('home')">+ HOME</button>
+    <button class="homeBtn" onclick="restar('home')">- HOME</button>
+    <button class="guestBtn" onclick="sumar('guest')">+ GUEST</button>
+    <button class="guestBtn" onclick="restar('guest')">- GUEST</button>
+    <button class="resetBtn" onclick="resetear()">RESET</button>
+  </div>
 
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js"></script>
   <script>
-    /*********************** 1) PEGA TU CONFIGURACIÓN DE FIREBASE AQUÍ *************************
-     * Ve a Firebase Console > Configuración del proyecto > Tus apps > SDK
-     * Copia el objeto config y pégalo abajo (sin comillas)
-     ***************************************************************************************/
-    var firebaseConfig = {
-      apiKey: "TU_API_KEY",
-      authDomain: "TU_AUTH_DOMAIN",
-      databaseURL: "https://TU_PROJECT.firebaseio.com",
-      projectId: "TU_PROJECT_ID",
-      storageBucket: "TU_BUCKET.appspot.com",
-      messagingSenderId: "SENDER_ID",
-      appId: "APP_ID"
-    };
-    // -----------------------------------------------------------------------------------------
-    // Inicializa Firebase
-    firebase.initializeApp(firebaseConfig);
-    var db = firebase.database();
-    var ref = db.ref('padel/marcador'); // ruta donde guardamos el estado
-
-    // Estado por defecto (estructura en la DB)
-    const defaultState = {
-      indexHome: 0,
-      indexGuest: 0,
-      setsHome: [0,0,0],
-      setsGuest: [0,0,0],
-      setActual: 0
+    // Configuración de tu Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyDpSnx0D9b7KX4g0bhy4X8zExhrWPJwZbw",
+      authDomain: "contador-de-padel.firebaseapp.com",
+      databaseURL: "https://contador-de-padel-default-rtdb.firebaseio.com",
+      projectId: "contador-de-padel",
+      storageBucket: "contador-de-padel.firebasestorage.app",
+      messagingSenderId: "316675340153",
+      appId: "1:316675340153:web:b658ec42d5a7a2d4fb21a8",
+      measurementId: "G-49KZNXWMTY"
     };
 
-    // Inicializa la base si no existe
-    ref.once('value').then(snap => {
-      if (!snap.exists()) {
-        ref.set(defaultState);
-      }
-    });
+    // Inicializar Firebase
+    const app = firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
 
-    // Escucha cambios en tiempo real y actualiza UI
-    ref.on('value', snap => {
-      const state = snap.val();
-      if (!state) return;
-      updateUI(state);
-    });
-
-    // Map de progresión de puntos
     const puntos = [0,15,30,40,"P"];
+    let indexHome = 0;
+    let indexGuest = 0;
+    let setsHome = [0,0,0];
+    let setsGuest = [0,0,0];
+    let setActual = 0;
 
-    function updateUI(state){
-      // indexes a mostrar
-      const ih = state.indexHome ?? 0;
-      const ig = state.indexGuest ?? 0;
-      document.getElementById('scoreHome').textContent = puntos[ih];
-      document.getElementById('scoreGuest').textContent = puntos[ig];
-
-      // sets
-      const sh = state.setsHome || [0,0,0];
-      const sg = state.setsGuest || [0,0,0];
-      for(let i=0;i<3;i++){
-        document.getElementById('setHome'+(i+1)).textContent = sh[i];
-        document.getElementById('setGuest'+(i+1)).textContent = sg[i];
+    function actualizarMarcador() {
+      document.getElementById("scoreHome").textContent = puntos[indexHome];
+      document.getElementById("scoreGuest").textContent = puntos[indexGuest];
+      for (let i=0; i<3; i++) {
+        document.getElementById("setHome"+(i+1)).textContent = setsHome[i];
+        document.getElementById("setGuest"+(i+1)).textContent = setsGuest[i];
       }
     }
 
-    /********** Funciones que modifican el estado en la DB (usando transaction para evitar conflictos) **********/
-    function changePoint(equipo, delta){
-      // Si delta es +1 o -1 (sumar o restar puntos del score).
-      // Para sumar avanzamos en la progresion; si llegamos a "P" (ultimo), convertimos en juego y sumamos set (según reglas).
-      // Para restar disminuimos el index si >0.
-      ref.transaction(curr => {
-        if (!curr) curr = JSON.parse(JSON.stringify(defaultState));
-
-        // si ya pasamos los 3 sets no hacemos nada
-        if (curr.setActual >= 3) return curr;
-
-        if (delta > 0) {
-          if (equipo === 'home') {
-            if (curr.indexHome < puntos.length - 1) {
-              curr.indexHome++;
-            } else {
-              // llegó al punto -> reinicia puntos y sumar juego en setActual si permitido
-              // solo sumar set si en ese recuadro ninguno llegó a 6
-              if (curr.setsHome[curr.setActual] < 6 && curr.setsGuest[curr.setActual] < 6) {
-                curr.setsHome[curr.setActual]++;
-                // si alcanza 6, avanzar de set
-                if (curr.setsHome[curr.setActual] === 6) {
-                  curr.setActual = Math.min(3, curr.setActual + 1);
-                }
-              }
-              curr.indexHome = 0;
-              curr.indexGuest = 0;
-            }
-          } else {
-            if (curr.indexGuest < puntos.length - 1) {
-              curr.indexGuest++;
-            } else {
-              if (curr.setsGuest[curr.setActual] < 6 && curr.setsHome[curr.setActual] < 6) {
-                curr.setsGuest[curr.setActual]++;
-                if (curr.setsGuest[curr.setActual] === 6) {
-                  curr.setActual = Math.min(3, curr.setActual + 1);
-                }
-              }
-              curr.indexHome = 0;
-              curr.indexGuest = 0;
-            }
-          }
-        } else {
-          // delta negativo: restar puntos (solo en score, no en los sets)
-          if (equipo === 'home') {
-            if (curr.indexHome > 0) curr.indexHome--;
-          } else {
-            if (curr.indexGuest > 0) curr.indexGuest--;
-          }
-        }
-        return curr;
-      }, function(error, committed, snapshot){
-        if (error) {
-          console.error("Error en transaction:", error);
-        }
+    function syncData() {
+      firebase.database().ref("marcador").set({
+        home: { score: indexHome, sets: setsHome },
+        guest: { score: indexGuest, sets: setsGuest },
+        setActual: setActual
       });
     }
 
-    // Reseteo total (escribe el estado por defecto en la DB)
-    function resetAll(){
-      if (!confirm("¿Seguro quieres resetear todo el marcador?")) return;
-      ref.set(defaultState).then(()=> {
-        console.log("Marcador reseteado");
-      }).catch(err => console.error(err));
+    firebase.database().ref("marcador").on("value", (snapshot) => {
+      const data = snapshot.val();
+      if (!data) return;
+      indexHome = data.home.score;
+      indexGuest = data.guest.score;
+      setsHome = data.home.sets;
+      setsGuest = data.guest.sets;
+      setActual = data.setActual;
+      actualizarMarcador();
+    });
+
+    function sumar(equipo) {
+      if (equipo === "home") {
+        if (indexHome < puntos.length-1) {
+          indexHome++;
+        } else {
+          indexHome = 0;
+          sumarJuego("home");
+        }
+      } else {
+        if (indexGuest < puntos.length-1) {
+          indexGuest++;
+        } else {
+          indexGuest = 0;
+          sumarJuego("guest");
+        }
+      }
+      syncData();
     }
 
+    function restar(equipo) {
+      if (equipo === "home") {
+        if (indexHome > 0) indexHome--;
+      } else {
+        if (indexGuest > 0) indexGuest--;
+      }
+      syncData();
+    }
+
+    function sumarJuego(equipo) {
+      if (setActual >= 3) return;
+      if (equipo === "home") {
+        if (setsHome[setActual] < 6 && setsGuest[setActual] < 6) {
+          setsHome[setActual]++;
+          if (setsHome[setActual] === 6) avanzarSet();
+        }
+      } else {
+        if (setsGuest[setActual] < 6 && setsHome[setActual] < 6) {
+          setsGuest[setActual]++;
+          if (setsGuest[setActual] === 6) avanzarSet();
+        }
+      }
+    }
+
+    function avanzarSet() {
+      setActual++;
+      indexHome = 0;
+      indexGuest = 0;
+    }
+
+    function resetear() {
+      indexHome = 0;
+      indexGuest = 0;
+      setsHome = [0,0,0];
+      setsGuest = [0,0,0];
+      setActual = 0;
+      syncData();
+    }
+
+    actualizarMarcador();
   </script>
 </body>
 </html>
