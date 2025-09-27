@@ -11,7 +11,7 @@
       flex-direction: column;
       justify-content: center;
       align-items: center;
-      background: url('https://images.unsplash.com/photo-1623961207223-40c1fae9a60c?ixlib=rb-4.0.3&auto=format&fit=crop&w=1400&q=80') no-repeat center center/cover;
+      background: url('https://images.unsplash.com/photo-1617957741643-2a7bf2799962?ixlib=rb-4.0.3&auto=format&fit=crop&w=1400&q=80') no-repeat center center/cover;
       position: relative;
       font-family: monospace;
     }
@@ -21,8 +21,8 @@
       position: absolute;
       top: 0; left: 0;
       width: 100%; height: 100%;
-      background: rgba(0,0,0,0.7);
-      backdrop-filter: blur(6px);
+      background: rgba(0,0,0,0.55); /* menos oscuro */
+      backdrop-filter: blur(3px);   /* menos blur */
       z-index: 0;
     }
 
@@ -31,9 +31,11 @@
       gap: 60px;
       padding: 30px 50px;
       border-radius: 20px;
-      background: rgba(0,0,0,0.85);
+      background: rgba(0,0,0,0.75);
       box-shadow: 0 0 30px rgba(0,0,0,0.9);
       z-index: 1;
+      flex-wrap: wrap;
+      justify-content: center;
     }
 
     .equipo {
@@ -78,12 +80,21 @@
       border-radius: 10px;
       background: #111;
       text-shadow: 0 0 15px currentColor, 0 0 30px currentColor;
+      transition: all 0.3s ease;
+    }
+
+    /* 🔥 Indicador de set actual */
+    .set.activo {
+      border: 3px solid yellow;
+      box-shadow: 0 0 15px yellow, 0 0 30px yellow;
     }
 
     .botones {
       margin-top: 40px;
       display: flex;
-      gap: 25px;
+      gap: 15px;
+      flex-wrap: wrap;
+      justify-content: center;
       z-index: 1;
     }
 
@@ -104,6 +115,15 @@
     .homeBtn { background: red; color: white; box-shadow: 0 0 15px red; }
     .guestBtn { background: lime; color: black; box-shadow: 0 0 15px lime; }
     .resetBtn { background: orange; color: white; box-shadow: 0 0 15px orange; }
+
+    /* 📱 Responsive */
+    @media (max-width: 768px) {
+      .titulo { font-size: 1.8em; }
+      .score { font-size: 4em; }
+      .set { font-size: 2em; width: 45px; height: 45px; }
+      button { padding: 10px 18px; font-size: 1em; }
+      .marcador { gap: 20px; padding: 20px; }
+    }
   </style>
 </head>
 <body>
@@ -177,8 +197,18 @@
       document.getElementById("scoreHome").textContent = puntos[indexHome];
       document.getElementById("scoreGuest").textContent = puntos[indexGuest];
       for (let i = 0; i < 3; i++) {
-        document.getElementById("setHome" + (i + 1)).textContent = setsHome[i];
-        document.getElementById("setGuest" + (i + 1)).textContent = setsGuest[i];
+        const homeSet = document.getElementById("setHome" + (i + 1));
+        const guestSet = document.getElementById("setGuest" + (i + 1));
+        homeSet.textContent = setsHome[i];
+        guestSet.textContent = setsGuest[i];
+        // 🔥 Marcar set actual
+        if (i === setActual) {
+          homeSet.classList.add("activo");
+          guestSet.classList.add("activo");
+        } else {
+          homeSet.classList.remove("activo");
+          guestSet.classList.remove("activo");
+        }
       }
     }
 
