@@ -11,7 +11,7 @@
       flex-direction: column;
       justify-content: center;
       align-items: center;
-      background: url('https://images.unsplash.com/photo-1617957741643-2a7bf2799962?ixlib=rb-4.0.3&auto=format&fit=crop&w=1400&q=80') no-repeat center center/cover;
+      background: url('https://images.unsplash.com/photo-1599050751794-59a03e4d21c8?auto=format&fit=crop&w=1600&q=80') no-repeat center center/cover;
       position: relative;
       font-family: monospace;
     }
@@ -21,8 +21,8 @@
       position: absolute;
       top: 0; left: 0;
       width: 100%; height: 100%;
-      background: rgba(0,0,0,0.55); /* menos oscuro */
-      backdrop-filter: blur(3px);   /* menos blur */
+      background: rgba(0,0,0,0.45);
+      backdrop-filter: blur(2px);
       z-index: 0;
     }
 
@@ -31,11 +31,12 @@
       gap: 60px;
       padding: 30px 50px;
       border-radius: 20px;
-      background: rgba(0,0,0,0.75);
+      background: rgba(0,0,0,0.8);
       box-shadow: 0 0 30px rgba(0,0,0,0.9);
       z-index: 1;
       flex-wrap: wrap;
       justify-content: center;
+      position: relative;
     }
 
     .equipo {
@@ -43,13 +44,23 @@
       flex-direction: column;
       align-items: center;
       min-width: 200px;
+      position: relative;
     }
 
     .titulo {
-      font-size: 2.5em;
+      font-size: 2em;
       margin-bottom: 10px;
       color: white;
       letter-spacing: 3px;
+      cursor: pointer;
+    }
+
+    .titulo input {
+      font-size: 1em;
+      text-align: center;
+      border: none;
+      border-radius: 5px;
+      padding: 5px 10px;
     }
 
     .score {
@@ -58,6 +69,11 @@
       letter-spacing: 5px;
       margin-bottom: 15px;
       text-shadow: 0 0 15px currentColor, 0 0 30px currentColor, 0 0 50px currentColor;
+      transition: transform 0.2s ease;
+    }
+
+    .score.animar {
+      transform: scale(1.3);
     }
 
     .home { color: red; }
@@ -83,14 +99,35 @@
       transition: all 0.3s ease;
     }
 
-    /* 🔥 Indicador de set actual */
     .set.activo {
       border: 3px solid yellow;
       box-shadow: 0 0 15px yellow, 0 0 30px yellow;
     }
 
+    .saque {
+      position: absolute;
+      bottom: -50px;
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      padding: 0 30px;
+    }
+
+    .flecha {
+      font-size: 2.5em;
+      color: white;
+      opacity: 0.3;
+      text-shadow: 0 0 10px white;
+      transition: all 0.3s ease;
+    }
+
+    .flecha.activa {
+      opacity: 1;
+      text-shadow: 0 0 20px cyan, 0 0 40px cyan;
+    }
+
     .botones {
-      margin-top: 40px;
+      margin-top: 60px;
       display: flex;
       gap: 15px;
       flex-wrap: wrap;
@@ -108,27 +145,25 @@
       transition: transform 0.2s ease;
     }
 
-    button:hover {
-      transform: scale(1.1);
-    }
-
+    button:hover { transform: scale(1.1); }
     .homeBtn { background: red; color: white; box-shadow: 0 0 15px red; }
     .guestBtn { background: lime; color: black; box-shadow: 0 0 15px lime; }
     .resetBtn { background: orange; color: white; box-shadow: 0 0 15px orange; }
+    .undoBtn { background: gray; color: white; box-shadow: 0 0 15px gray; }
 
-    /* 📱 Responsive */
     @media (max-width: 768px) {
-      .titulo { font-size: 1.8em; }
+      .titulo { font-size: 1.5em; }
       .score { font-size: 4em; }
       .set { font-size: 2em; width: 45px; height: 45px; }
       button { padding: 10px 18px; font-size: 1em; }
       .marcador { gap: 20px; padding: 20px; }
+      .saque { bottom: -40px; padding: 0 15px; }
+      .flecha { font-size: 2em; }
     }
   </style>
 </head>
 <body>
 
-  <!-- 🔐 Protección por contraseña -->
   <script>
     const clave = prompt("🔐 Ingrese la clave para acceder:");
     if (clave !== "1234") {
@@ -139,7 +174,7 @@
 
   <div class="marcador">
     <div class="equipo">
-      <div class="titulo">HOME</div>
+      <div class="titulo" onclick="editarNombre('home')" id="nombreHome">HOME</div>
       <div id="scoreHome" class="score home">0</div>
       <div class="sets">
         <div id="setHome1" class="set home">0</div>
@@ -149,13 +184,18 @@
     </div>
 
     <div class="equipo">
-      <div class="titulo">GUEST</div>
+      <div class="titulo" onclick="editarNombre('guest')" id="nombreGuest">GUEST</div>
       <div id="scoreGuest" class="score guest">0</div>
       <div class="sets">
         <div id="setGuest1" class="set guest">0</div>
         <div id="setGuest2" class="set guest">0</div>
         <div id="setGuest3" class="set guest">0</div>
       </div>
+    </div>
+
+    <div class="saque">
+      <div id="flechaIzq" class="flecha">⬅</div>
+      <div id="flechaDer" class="flecha activa">➡</div>
     </div>
   </div>
 
@@ -164,6 +204,7 @@
     <button class="homeBtn" onclick="restar('home')">- HOME</button>
     <button class="guestBtn" onclick="sumar('guest')">+ GUEST</button>
     <button class="guestBtn" onclick="restar('guest')">- GUEST</button>
+    <button class="undoBtn" onclick="deshacer()">UNDO</button>
     <button class="resetBtn" onclick="resetear()">RESET</button>
   </div>
 
@@ -187,115 +228,81 @@
     const db = firebase.database();
 
     const puntos = [0, 15, 30, 40, "P"];
-    let indexHome = 0;
-    let indexGuest = 0;
-    let setsHome = [0, 0, 0];
-    let setsGuest = [0, 0, 0];
+    let indexHome = 0, indexGuest = 0, setsHome = [0,0,0], setsGuest = [0,0,0];
     let setActual = 0;
+    let saqueDerecha = true;
+    let historial = [];
+    let nombreHome = "HOME";
+    let nombreGuest = "GUEST";
+
+    function animarScore(id) {
+      const el = document.getElementById(id);
+      el.classList.add("animar");
+      setTimeout(() => el.classList.remove("animar"), 250);
+    }
 
     function actualizarMarcador() {
       document.getElementById("scoreHome").textContent = puntos[indexHome];
       document.getElementById("scoreGuest").textContent = puntos[indexGuest];
-      for (let i = 0; i < 3; i++) {
-        const homeSet = document.getElementById("setHome" + (i + 1));
-        const guestSet = document.getElementById("setGuest" + (i + 1));
+      for (let i=0; i<3; i++) {
+        const homeSet = document.getElementById("setHome"+(i+1));
+        const guestSet = document.getElementById("setGuest"+(i+1));
         homeSet.textContent = setsHome[i];
         guestSet.textContent = setsGuest[i];
-        // 🔥 Marcar set actual
-        if (i === setActual) {
-          homeSet.classList.add("activo");
-          guestSet.classList.add("activo");
-        } else {
-          homeSet.classList.remove("activo");
-          guestSet.classList.remove("activo");
-        }
+        homeSet.classList.toggle("activo", i === setActual);
+        guestSet.classList.toggle("activo", i === setActual);
       }
+      document.getElementById("flechaDer").classList.toggle("activa", saqueDerecha);
+      document.getElementById("flechaIzq").classList.toggle("activa", !saqueDerecha);
+      document.getElementById("nombreHome").textContent = nombreHome;
+      document.getElementById("nombreGuest").textContent = nombreGuest;
     }
 
     function syncData() {
-      firebase.database().ref("marcador").set({
-        home: { score: indexHome, sets: setsHome },
-        guest: { score: indexGuest, sets: setsGuest },
-        setActual: setActual
+      db.ref("marcador").set({
+        home: {score:indexHome, sets:setsHome},
+        guest: {score:indexGuest, sets:setsGuest},
+        setActual, saqueDerecha, nombreHome, nombreGuest
       });
     }
 
-    firebase.database().ref("marcador").on("value", (snapshot) => {
-      const data = snapshot.val();
-      if (!data) return;
-      indexHome = data.home.score;
-      indexGuest = data.guest.score;
-      setsHome = data.home.sets;
-      setsGuest = data.guest.sets;
-      setActual = data.setActual;
+    db.ref("marcador").on("value", (snapshot)=>{
+      const data=snapshot.val(); if(!data) return;
+      indexHome=data.home.score; indexGuest=data.guest.score;
+      setsHome=data.home.sets; setsGuest=data.guest.sets;
+      setActual=data.setActual; saqueDerecha=data.saqueDerecha;
+      nombreHome=data.nombreHome||"HOME"; nombreGuest=data.nombreGuest||"GUEST";
       actualizarMarcador();
     });
 
-    function sumar(equipo) {
-      if (equipo === "home") {
-        if (indexHome < puntos.length - 1) {
-          indexHome++;
-        } else {
-          indexHome = 0;
-          sumarJuego("home");
-          indexGuest = 0;
-        }
+    function sumar(equipo){
+      historial.push({indexHome,indexGuest,setsHome:[...setsHome],setsGuest:[...setsGuest],setActual,saqueDerecha});
+      saqueDerecha=!saqueDerecha;
+      if(equipo==="home"){
+        if(indexHome<puntos.length-1){ indexHome++; animarScore("scoreHome"); }
+        else { indexHome=0; indexGuest=0; sumarJuego("home"); saqueDerecha=true; }
       } else {
-        if (indexGuest < puntos.length - 1) {
-          indexGuest++;
-        } else {
-          indexGuest = 0;
-          sumarJuego("guest");
-          indexHome = 0;
-        }
+        if(indexGuest<puntos.length-1){ indexGuest++; animarScore("scoreGuest"); }
+        else { indexGuest=0; indexHome=0; sumarJuego("guest"); saqueDerecha=true; }
       }
       syncData();
     }
 
-    function restar(equipo) {
-      if (equipo === "home") {
-        if (indexHome > 0) indexHome--;
-      } else {
-        if (indexGuest > 0) indexGuest--;
-      }
-      syncData();
+    function restar(equipo){ if(equipo==="home"&&indexHome>0) indexHome--; else if(equipo==="guest"&&indexGuest>0) indexGuest--; syncData(); }
+
+    function sumarJuego(equipo){
+      if(setActual>=3) return;
+      if(equipo==="home"){ if(setsHome[setActual]<6&&setsGuest[setActual]<6){ setsHome[setActual]++; if(setsHome[setActual]===6) avanzarSet(); } }
+      else { if(setsGuest[setActual]<6&&setsHome[setActual]<6){ setsGuest[setActual]++; if(setsGuest[setActual]===6) avanzarSet(); } }
     }
 
-    function sumarJuego(equipo) {
-      if (setActual >= 3) return;
-      if (equipo === "home") {
-        if (setsHome[setActual] < 6 && setsGuest[setActual] < 6) {
-          setsHome[setActual]++;
-          if (setsHome[setActual] === 6) avanzarSet();
-        }
-      } else {
-        if (setsGuest[setActual] < 6 && setsHome[setActual] < 6) {
-          setsGuest[setActual]++;
-          if (setsGuest[setActual] === 6) avanzarSet();
-        }
-      }
-    }
-
-    function avanzarSet() {
-      setActual++;
-      indexHome = 0;
-      indexGuest = 0;
-    }
-
-    function resetear() {
-      indexHome = 0;
-      indexGuest = 0;
-      setsHome = [0, 0, 0];
-      setsGuest = [0, 0, 0];
-      setActual = 0;
-      syncData();
-    }
+    function avanzarSet(){ setActual++; indexHome=0; indexGuest=0; }
+    function deshacer(){ if(historial.length){ const prev=historial.pop(); Object.assign(window,prev); syncData(); } }
+    function resetear(){ indexHome=0; indexGuest=0; setsHome=[0,0,0]; setsGuest=[0,0,0]; setActual=0; saqueDerecha=true; historial=[]; syncData(); }
+    function editarNombre(equipo){ const nuevo=prompt("Ingrese el nombre del equipo:"); if(!nuevo) return; if(equipo==="home") nombreHome=nuevo; else nombreGuest=nuevo; syncData(); }
 
     actualizarMarcador();
-
-    window.sumar = sumar;
-    window.restar = restar;
-    window.resetear = resetear;
+    window.sumar=sumar; window.restar=restar; window.resetear=resetear; window.deshacer=deshacer;
   </script>
 </body>
 </html>
