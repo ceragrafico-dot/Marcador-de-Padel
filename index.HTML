@@ -2,7 +2,8 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <title>Marcador Pádel</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Marcador Pádel Mejorado</title>
   <style>
     body {
       margin: 0;
@@ -11,286 +12,204 @@
       flex-direction: column;
       justify-content: center;
       align-items: center;
-      background: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)),
-        url('https://cdn.pixabay.com/photo/2016/07/28/00/50/grass-1545608_1280.jpg')
-        no-repeat center center/cover;
       font-family: monospace;
       position: relative;
-    }
-    body::before { content: none; }
-
-    .marcador {
-      display: flex;
-      gap: 60px;
-      padding: 30px 50px;
-      border-radius: 20px;
-      background: rgba(0,0,0,0.8);
-      box-shadow: 0 0 30px rgba(0,0,0,0.9);
-      z-index: 1;
-      flex-wrap: wrap;
-      justify-content: center;
-      position: relative;
+      background: 
+        linear-gradient(rgba(0,0,0,0.35), rgba(0,0,0,0.35)),
+        url('https://cdn.pixabay.com/photo/2021/05/05/15/29/padel-6231327_1280.jpg')
+        no-repeat center center/cover;
+      color: white;
     }
 
-    .equipo {
+    #marcador {
       display: flex;
       flex-direction: column;
       align-items: center;
-      min-width: 200px;
-      position: relative;
+      background: rgba(0,0,0,0.6);
+      padding: 20px 40px;
+      border-radius: 20px;
+      box-shadow: 0 0 30px rgba(0,0,0,0.8);
+      backdrop-filter: blur(6px);
+      z-index: 2;
     }
 
-    .titulo {
+    #equipos {
+      display: flex;
+      justify-content: space-between;
+      width: 100%;
       font-size: 2em;
       margin-bottom: 10px;
-      color: white;
-      letter-spacing: 3px;
-      cursor: pointer;
     }
 
-    .score {
-      font-size: 6em;
-      font-weight: bold;
-      letter-spacing: 5px;
-      margin-bottom: 15px;
-      text-shadow: 0 0 15px currentColor, 0 0 30px currentColor, 0 0 50px currentColor;
-      transition: transform 0.2s ease;
-    }
-
-    .score.animar { transform: scale(1.3); }
-    .home { color: red; }
-    .guest { color: lime; }
-
-    .sets {
+    #puntos {
       display: flex;
-      gap: 20px;
+      justify-content: space-between;
+      width: 100%;
+      font-size: 5em;
+    }
+
+    #sets {
+      display: flex;
+      justify-content: space-between;
+      width: 100%;
+      font-size: 1.5em;
       margin-top: 10px;
     }
 
-    .set {
-      font-size: 3em;
-      width: 60px;
-      height: 60px;
+    .equipo {
+      text-align: center;
+      flex: 1;
+    }
+
+    #botones {
+      margin-top: 20px;
       display: flex;
-      align-items: center;
-      justify-content: center;
-      border: 2px solid #444;
-      border-radius: 10px;
-      background: #111;
-      text-shadow: 0 0 15px currentColor, 0 0 30px currentColor;
-      transition: all 0.3s ease;
-    }
-
-    .set.activo {
-      border: 3px solid yellow;
-      box-shadow: 0 0 15px yellow, 0 0 30px yellow;
-    }
-
-    .saque {
-      position: absolute;
-      bottom: -50px;
-      width: 100%;
-      display: flex;
-      justify-content: space-between;
-      padding: 0 30px;
-    }
-
-    .flecha {
-      font-size: 2.5em;
-      color: white;
-      opacity: 0.3;
-      text-shadow: 0 0 10px white;
-      transition: all 0.3s ease;
-    }
-
-    .flecha.activa {
-      opacity: 1;
-      text-shadow: 0 0 20px cyan, 0 0 40px cyan;
-    }
-
-    .botones {
-      margin-top: 60px;
-      display: flex;
-      gap: 15px;
       flex-wrap: wrap;
       justify-content: center;
-      z-index: 1;
+      gap: 10px;
+      z-index: 2;
     }
 
     button {
-      padding: 12px 25px;
-      font-size: 1.2em;
-      border: none;
+      background: rgba(255,255,255,0.2);
+      border: 2px solid white;
+      color: white;
+      padding: 8px 14px;
       border-radius: 8px;
+      font-size: 1em;
       cursor: pointer;
-      font-weight: bold;
-      transition: transform 0.2s ease;
+      transition: 0.2s;
     }
 
-    button:hover { transform: scale(1.1); }
-    .homeBtn { background: red; color: white; box-shadow: 0 0 15px red; }
-    .guestBtn { background: lime; color: black; box-shadow: 0 0 15px lime; }
-    .resetBtn { background: orange; color: white; box-shadow: 0 0 15px orange; }
-    .undoBtn { background: gray; color: white; box-shadow: 0 0 15px gray; }
-
-    @media (max-width: 768px) {
-      .titulo { font-size: 1.5em; }
-      .score { font-size: 4em; }
-      .set { font-size: 2em; width: 45px; height: 45px; }
-      button { padding: 10px 18px; font-size: 1em; }
-      .marcador { gap: 20px; padding: 20px; }
-      .saque { bottom: -40px; padding: 0 15px; }
-      .flecha { font-size: 2em; }
+    button:hover {
+      background: rgba(255,255,255,0.4);
     }
+
+    #historialContainer {
+      background: rgba(0,0,0,0.6);
+      color: white;
+      margin-top: 25px;
+      padding: 15px 25px;
+      border-radius: 12px;
+      font-family: monospace;
+      font-size: 1em;
+      width: 90%;
+      max-width: 700px;
+      overflow-y: auto;
+      max-height: 200px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.6);
+      z-index: 2;
+    }
+
+    #historialContainer h3 {
+      margin: 0 0 10px 0;
+      text-align: center;
+    }
+
+    #cronometro {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: rgba(0,0,0,0.7);
+      color: white;
+      padding: 10px 15px;
+      border-radius: 10px;
+      font-family: monospace;
+      font-size: 1.2em;
+      z-index: 3;
+      box-shadow: 0 0 10px rgba(0,0,0,0.5);
+      text-align: center;
+    }
+
+    #cronometro button {
+      margin-top: 5px;
+      margin-right: 4px;
+      border: none;
+      border-radius: 5px;
+      padding: 4px 8px;
+      cursor: pointer;
+      font-size: 0.9em;
+    }
+
+    #cronometro button:nth-child(1) { background: lime; }
+    #cronometro button:nth-child(2) { background: orange; }
+    #cronometro button:nth-child(3) { background: red; color: white; }
+
   </style>
 </head>
 <body>
-
-  <script>
-    const clave = prompt("🔐 Ingrese la clave para acceder:");
-    if (clave !== "1234") {
-      document.body.innerHTML = "<h1 style='color:white; text-align:center; margin-top:50px;'>⛔ Acceso denegado</h1>";
-      throw new Error("Acceso denegado");
-    }
-  </script>
-
-  <div class="marcador">
-    <div class="equipo">
-      <div class="titulo" onclick="editarNombre('home')" id="nombreHome">HOME</div>
-      <div id="scoreHome" class="score home">0</div>
-      <div class="sets">
-        <div id="setHome1" class="set home">0</div>
-        <div id="setHome2" class="set home">0</div>
-        <div id="setHome3" class="set home">0</div>
-      </div>
+  <div id="marcador">
+    <div id="equipos">
+      <div class="equipo" id="nombreHome">HOME</div>
+      <div class="equipo" id="nombreGuest">GUEST</div>
     </div>
-
-    <div class="equipo">
-      <div class="titulo" onclick="editarNombre('guest')" id="nombreGuest">GUEST</div>
-      <div id="scoreGuest" class="score guest">0</div>
-      <div class="sets">
-        <div id="setGuest1" class="set guest">0</div>
-        <div id="setGuest2" class="set guest">0</div>
-        <div id="setGuest3" class="set guest">0</div>
-      </div>
+    <div id="puntos">
+      <div class="equipo" id="puntosHome">0</div>
+      <div class="equipo" id="puntosGuest">0</div>
     </div>
-
-    <div class="saque">
-      <div id="flechaIzq" class="flecha">⬅</div>
-      <div id="flechaDer" class="flecha activa">➡</div>
+    <div id="sets">
+      <div class="equipo" id="setsHome">0 0 0</div>
+      <div class="equipo" id="setsGuest">0 0 0</div>
     </div>
   </div>
 
-  <div class="botones">
-    <button class="homeBtn" onclick="sumar('home')">+ HOME</button>
-    <button class="homeBtn" onclick="restar('home')">- HOME</button>
-    <button class="guestBtn" onclick="sumar('guest')">+ GUEST</button>
-    <button class="guestBtn" onclick="restar('guest')">- GUEST</button>
-    <button class="undoBtn" onclick="deshacer()">UNDO</button>
-    <button class="resetBtn" onclick="resetear()">RESET</button>
+  <div id="botones">
+    <button onclick="sumar('home')">+ HOME</button>
+    <button onclick="restar('home')">- HOME</button>
+    <button onclick="sumar('guest')">+ GUEST</button>
+    <button onclick="restar('guest')">- GUEST</button>
+    <button onclick="reset()">RESET</button>
+    <button onclick="deshacer()">UNDO</button>
   </div>
 
-  <!-- 🧾 Historial visual -->
-  <div id="historialContainer" style="
-    background: rgba(0,0,0,0.6);
-    color: white;
-    margin-top: 25px;
-    padding: 15px 25px;
-    border-radius: 12px;
-    font-family: monospace;
-    font-size: 1em;
-    width: 90%;
-    max-width: 700px;
-    overflow-y: auto;
-    max-height: 200px;
-    box-shadow: 0 0 15px rgba(0,0,0,0.6);
-    z-index: 2;
-  ">
-    <h3 style="margin:0 0 10px 0; text-align:center;">📜 Historial</h3>
+  <div id="historialContainer">
+    <h3>📜 Historial</h3>
     <div id="historialLista"></div>
   </div>
 
-  <!-- ⏱ Cronómetro -->
-  <div id="cronometro" style="
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    background: rgba(0,0,0,0.7);
-    color: white;
-    padding: 10px 15px;
-    border-radius: 10px;
-    font-family: monospace;
-    font-size: 1.2em;
-    z-index: 3;
-    box-shadow: 0 0 10px rgba(0,0,0,0.5);
-  ">
-    ⏱ <span id="tiempo">00:00</span>
-    <div style="margin-top:5px; display:flex; gap:5px; justify-content:center;">
-      <button onclick="iniciarCrono()" style="background:lime; border:none; border-radius:5px; cursor:pointer;">▶</button>
-      <button onclick="pausarCrono()" style="background:orange; border:none; border-radius:5px; cursor:pointer;">⏸</button>
-      <button onclick="reiniciarCrono()" style="background:red; color:white; border:none; border-radius:5px; cursor:pointer;">⟲</button>
-    </div>
+  <div id="cronometro">
+    ⏱ <span id="tiempo">00:00</span><br>
+    <button onclick="iniciarCrono()">▶</button>
+    <button onclick="pausarCrono()">⏸</button>
+    <button onclick="reiniciarCrono()">⟲</button>
   </div>
 
-  <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-
   <script>
+    // 🔥 Configura tu Firebase:
     const firebaseConfig = {
-      apiKey: "AIzaSyDpSnx0D9b7KX4g0bhy4X8zExhrWPJwZbw",
-      authDomain: "contador-de-padel.firebaseapp.com",
-      databaseURL: "https://contador-de-padel-default-rtdb.firebaseio.com",
-      projectId: "contador-de-padel",
-      storageBucket: "contador-de-padel.firebasestorage.app",
-      messagingSenderId: "316675340153",
-      appId: "1:316675340153:web:b658ec42d5a7a2d4fb21a8",
-      measurementId: "G-49KZNXWMTY"
+      apiKey: "TU_API_KEY",
+      authDomain: "TU_AUTH_DOMAIN",
+      databaseURL: "TU_DATABASE_URL",
+      projectId: "TU_PROJECT_ID",
+      storageBucket: "TU_STORAGE_BUCKET",
+      messagingSenderId: "TU_SENDER_ID",
+      appId: "TU_APP_ID"
     };
-
-    const app = firebase.initializeApp(firebaseConfig);
+    firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    const puntos = [0, 15, 30, 40, "P"];
-    let indexHome = 0, indexGuest = 0, setsHome = [0,0,0], setsGuest = [0,0,0];
+    const puntos = [0, 15, 30, 40, 'P'];
+    let indexHome = 0, indexGuest = 0;
+    let setsHome = [0, 0, 0];
+    let setsGuest = [0, 0, 0];
     let setActual = 0;
-    let saqueDerecha = true;
     let historial = [];
-    let nombreHome = "HOME";
-    let nombreGuest = "GUEST";
 
-    function animarScore(id) {
-      const el = document.getElementById(id);
-      el.classList.add("animar");
-      setTimeout(() => el.classList.remove("animar"), 250);
-    }
-
-    function actualizarMarcador() {
-      document.getElementById("scoreHome").textContent = puntos[indexHome];
-      document.getElementById("scoreGuest").textContent = puntos[indexGuest];
-      for (let i=0; i<3; i++) {
-        const homeSet = document.getElementById("setHome"+(i+1));
-        const guestSet = document.getElementById("setGuest"+(i+1));
-        homeSet.textContent = setsHome[i];
-        guestSet.textContent = setsGuest[i];
-        homeSet.classList.toggle("activo", i === setActual);
-        guestSet.classList.toggle("activo", i === setActual);
-      }
-      document.getElementById("flechaDer").classList.toggle("activa", saqueDerecha);
-      document.getElementById("flechaIzq").classList.toggle("activa", !saqueDerecha);
-      document.getElementById("nombreHome").textContent = nombreHome;
-      document.getElementById("nombreGuest").textContent = nombreGuest;
+    function actualizarDisplay() {
+      document.getElementById("puntosHome").textContent = puntos[indexHome];
+      document.getElementById("puntosGuest").textContent = puntos[indexGuest];
+      document.getElementById("setsHome").textContent = setsHome.join(' ');
+      document.getElementById("setsGuest").textContent = setsGuest.join(' ');
     }
 
     function syncData() {
       db.ref("marcador").set({
-        home: {score:indexHome, sets:setsHome},
-        guest: {score:indexGuest, sets:setsGuest},
-        setActual, saqueDerecha, nombreHome, nombreGuest
+        indexHome, indexGuest, setsHome, setsGuest, setActual
       });
     }
 
-    // 🧾 Guardar y mostrar historial
     function guardarHistorial() {
       const entrada = {
         home: puntos[indexHome],
@@ -308,52 +227,80 @@
       const registros = Object.values(data || {});
       registros.slice(-10).reverse().forEach(item => {
         const div = document.createElement("div");
-        div.textContent = `${item.timestamp} → ${nombreHome} ${item.setsHome.join('-')} (${item.home}) vs ${nombreGuest} ${item.setsGuest.join('-')} (${item.guest})`;
+        div.textContent = `${item.timestamp} → HOME ${item.setsHome.join('-')} (${item.home}) vs GUEST ${item.setsGuest.join('-')} (${item.guest})`;
         contenedor.appendChild(div);
       });
     }
 
-    db.ref("historial").on("value", snapshot => mostrarHistorial(snapshot.val()));
-
-    db.ref("marcador").on("value", (snapshot)=>{
-      const data=snapshot.val(); if(!data) return;
-      indexHome=data.home.score; indexGuest=data.guest.score;
-      setsHome=data.home.sets; setsGuest=data.guest.sets;
-      setActual=data.setActual; saqueDerecha=data.saqueDerecha;
-      nombreHome=data.nombreHome||"HOME"; nombreGuest=data.nombreGuest||"GUEST";
-      actualizarMarcador();
+    db.ref("historial").on("value", snapshot => {
+      mostrarHistorial(snapshot.val());
     });
 
-    function sumar(equipo){
-      historial.push({indexHome,indexGuest,setsHome:[...setsHome],setsGuest:[...setsGuest],setActual,saqueDerecha});
-      saqueDerecha=!saqueDerecha;
-      if(equipo==="home"){
-        if(indexHome<puntos.length-1){ indexHome++; animarScore("scoreHome"); }
-        else { indexHome=0; indexGuest=0; sumarJuego("home"); saqueDerecha=true; }
+    db.ref("marcador").on("value", snapshot => {
+      const data = snapshot.val();
+      if (!data) return;
+      indexHome = data.indexHome;
+      indexGuest = data.indexGuest;
+      setsHome = data.setsHome;
+      setsGuest = data.setsGuest;
+      setActual = data.setActual;
+      actualizarDisplay();
+    });
+
+    function sumar(equipo) {
+      historial.push({indexHome, indexGuest, setsHome: [...setsHome], setsGuest: [...setsGuest], setActual});
+      if (equipo === "home") {
+        indexHome++;
+        if (indexHome >= puntos.length) {
+          setsHome[setActual]++;
+          indexHome = 0;
+          indexGuest = 0;
+          if (setsHome[setActual] >= 6) setActual++;
+        }
       } else {
-        if(indexGuest<puntos.length-1){ indexGuest++; animarScore("scoreGuest"); }
-        else { indexGuest=0; indexHome=0; sumarJuego("guest"); saqueDerecha=true; }
+        indexGuest++;
+        if (indexGuest >= puntos.length) {
+          setsGuest[setActual]++;
+          indexHome = 0;
+          indexGuest = 0;
+          if (setsGuest[setActual] >= 6) setActual++;
+        }
       }
+      actualizarDisplay();
       syncData();
       guardarHistorial();
     }
 
-    function restar(equipo){ if(equipo==="home"&&indexHome>0) indexHome--; else if(equipo==="guest"&&indexGuest>0) indexGuest--; syncData(); }
-
-    function sumarJuego(equipo){
-      if(setActual>=3) return;
-      if(equipo==="home"){ if(setsHome[setActual]<6&&setsGuest[setActual]<6){ setsHome[setActual]++; if(setsHome[setActual]===6) avanzarSet(); } }
-      else { if(setsGuest[setActual]<6&&setsHome[setActual]<6){ setsGuest[setActual]++; if(setsGuest[setActual]===6) avanzarSet(); } }
+    function restar(equipo) {
+      if (equipo === "home" && indexHome > 0) indexHome--;
+      if (equipo === "guest" && indexGuest > 0) indexGuest--;
+      actualizarDisplay();
+      syncData();
     }
 
-    function avanzarSet(){ setActual++; indexHome=0; indexGuest=0; }
-    function deshacer(){ if(historial.length){ const prev=historial.pop(); Object.assign(window,prev); syncData(); } }
-    function resetear(){ indexHome=0; indexGuest=0; setsHome=[0,0,0]; setsGuest=[0,0,0]; setActual=0; saqueDerecha=true; historial=[]; syncData(); }
-    function editarNombre(equipo){ const nuevo=prompt("Ingrese el nombre del equipo:"); if(!nuevo) return; if(equipo==="home") nombreHome=nuevo; else nombreGuest=nuevo; syncData(); }
+    function reset() {
+      indexHome = 0;
+      indexGuest = 0;
+      setsHome = [0, 0, 0];
+      setsGuest = [0, 0, 0];
+      setActual = 0;
+      actualizarDisplay();
+      syncData();
+    }
 
-    actualizarMarcador();
+    function deshacer() {
+      const prev = historial.pop();
+      if (!prev) return;
+      indexHome = prev.indexHome;
+      indexGuest = prev.indexGuest;
+      setsHome = prev.setsHome;
+      setsGuest = prev.setsGuest;
+      setActual = prev.setActual;
+      actualizarDisplay();
+      syncData();
+    }
 
-    // ⏱ Cronómetro
+    // 🕒 Cronómetro
     let tiempoSegundos = 0;
     let intervalo = null;
 
@@ -382,7 +329,8 @@
       tiempoSegundos = 0;
       actualizarTiempo();
     }
+
+    actualizarDisplay();
   </script>
 </body>
 </html>
-
