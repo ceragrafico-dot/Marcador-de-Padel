@@ -257,10 +257,19 @@
   }
 
   function enviarWhatsApp(){
-    let texto = `🎾 *Resultado del Partido de Pádel* 🎾\n\n`;
-    texto += `🏠 ${ nombreHome}: ${setsHome.join(" - ")}\n`;
-    texto += `🧳 ${ nombreGuest}: ${setsGuest.join(" - ")}\n\n`;
-    texto += `📍 E nviado desde el marcador digital` de Cesar;
+    const now = new Date();
+    const fecha = now.toLocaleString();
+    let texto = `🎾 Resultado del Partido de Pádel (${fecha}) 🎾\n\n`;
+    texto += `🏠 ${ nombreHome }: ${ setsHome.join(" - ") }\n`;
+    texto += `🧳 ${ nombreGuest }: ${ setsGuest.join(" - ") }\n\n`;
+    // Resultado por sets
+    let setsGanadosHome = 0, setsGanadosGuest = 0;
+    for(let i=0;i<3;i++){
+      if(setsHome[i] > setsGuest[i]) setsGanadosHome++;
+      else if(setsGuest[i] > setsHome[i]) setsGanadosGuest++;
+    }
+    texto += `Resultado final: ${ nombreHome } ${ setsGanadosHome } - ${ setsGanadosGuest } ${ nombreGuest }\n\n`;
+    texto += `Enviado desde el marcador de César.`;
     const url = `https://wa.me/50767119564?text=${encodeURIComponent(texto)}`;
     window.open(url, '_blank');
   }
