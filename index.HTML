@@ -11,11 +11,10 @@
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    background: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)),
-      url('https://images.unsplash.com/photo-1599050751794-59a03e4d21c8?auto=format&fit=crop&w=1600&q=80')
+    background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)),
+      url('https://images.unsplash.com/photo-1624705002806-b7f7b4b18ad0?auto=format&fit=crop&w=1600&q=80')
       no-repeat center center/cover;
     font-family: monospace;
-    position: relative;
     color: white;
   }
   .marcador {
@@ -23,9 +22,8 @@
     gap: 60px;
     padding: 30px 50px;
     border-radius: 20px;
-    background: rgba(0,0,0,0.8);
+    background: rgba(0,0,0,0.85);
     box-shadow: 0 0 30px rgba(0,0,0,0.9);
-    z-index: 1;
     flex-wrap: wrap;
     justify-content: center;
     position: relative;
@@ -102,7 +100,6 @@
     gap: 15px;
     flex-wrap: wrap;
     justify-content: center;
-    z-index: 1;
   }
   button {
     padding: 12px 25px;
@@ -118,6 +115,7 @@
   .guestBtn { background: lime; color: black; box-shadow: 0 0 15px lime; }
   .resetBtn { background: orange; color: white; box-shadow: 0 0 15px orange; }
   .undoBtn { background: gray; color: white; box-shadow: 0 0 15px gray; }
+  .whatsappBtn { background: #25D366; color: white; box-shadow: 0 0 15px #25D366; }
   @media (max-width: 768px) {
     .titulo { font-size: 1.5em; }
     .score { font-size: 4em; }
@@ -165,10 +163,11 @@
   <button class="guestBtn" onclick="restar('guest')">- GUEST</button>
   <button class="undoBtn" onclick="deshacer()">UNDO</button>
   <button class="resetBtn" onclick="resetear()">RESET</button>
+  <button class="whatsappBtn" onclick="enviarWhatsApp()">📲 ENVIAR RESULTADO</button>
 </div>
 
 <script>
-  const puntos = [0, 15, 30, 40, 'P']; // P = punto partido (match point)
+  const puntos = [0, 15, 30, 40, 'P'];
   let indexHome = 0;
   let indexGuest = 0;
   let setsHome = [0,0,0];
@@ -179,7 +178,7 @@
   let nombreHome = "HOME";
   let nombreGuest = "GUEST";
 
-  function animarScore(id) {
+  function animarScore(id){
     const el = document.getElementById(id);
     el.classList.add("animar");
     setTimeout(() => el.classList.remove("animar"), 250);
@@ -198,46 +197,27 @@
     }
     document.getElementById("flechaDer").classList.toggle("activa", saqueDerecha);
     document.getElementById("flechaIzq").classList.toggle("activa", !saqueDerecha);
-    document.getElementById("nombreHome").textContent = nombreHome;
-    document.getElementById("nombreGuest").textContent = nombreGuest;
   }
 
   function sumar(equipo){
-    historial.push({
-      indexHome, indexGuest,
-      setsHome: [...setsHome],
-      setsGuest: [...setsGuest],
-      setActual,
-      saqueDerecha
-    });
+    historial.push({ indexHome, indexGuest, setsHome: [...setsHome], setsGuest: [...setsGuest], setActual, saqueDerecha });
 
-    // Cambia saque
     saqueDerecha = !saqueDerecha;
-
     if(equipo === "home"){
       if(indexHome < puntos.length - 1){
         indexHome++;
         animarScore("scoreHome");
       } else {
-        // Punto ganado, reset puntos y sumar juego
-        indexHome = 0;
-        indexGuest = 0;
-        sumarJuego("home");
-        // Saque vuelve al que ganó juego
-        saqueDerecha = true;
+        indexHome = 0; indexGuest = 0; sumarJuego("home"); saqueDerecha = true;
       }
     } else {
       if(indexGuest < puntos.length - 1){
         indexGuest++;
         animarScore("scoreGuest");
       } else {
-        indexGuest = 0;
-        indexHome = 0;
-        sumarJuego("guest");
-        saqueDerecha = true;
+        indexGuest = 0; indexHome = 0; sumarJuego("guest"); saqueDerecha = true;
       }
     }
-
     actualizarMarcador();
   }
 
@@ -248,72 +228,41 @@
   }
 
   function sumarJuego(equipo){
-    if(setActual >= 3) return; // No sumar si ya se terminó
+    if(setActual >= 3) return;
+    if(equipo === "home"){ setsHome[setActual]++; } 
+    else { setsGuest[setActual]++; }
 
-    if(equipo === "home"){
-      setsHome[setActual]++;
-    } else {
-      setsGuest[setActual]++;
-    }
-
-    // Reglas simples para terminar set a 6 puntos y ventaja 2 puntos mínimo
-    if( (setsHome[setActual] >= 6 || setsGuest[setActual] >= 6) && Math.abs(setsHome[setActual] - setsGuest[setActual]) >= 2 ) {
+    if((setsHome[setActual] >= 6 || setsGuest[setActual] >= 6) && Math.abs(setsHome[setActual] - setsGuest[setActual]) >= 2){
       setActual++;
-      if(setActual === 3){
-        mostrarResumenFinal();
-      }
     }
-
     actualizarMarcador();
   }
 
-  function mostrarResumenFinal(){
-    let setsGanadosHome = 0;
-    let setsGanadosGuest = 0;
-
-    for(let i=0; i<3; i++){
-      if(setsHome[i] > setsGuest[i]) setsGanadosHome++;
-      else if(setsGuest[i] > setsHome[i]) setsGanadosGuest++;
-    }
-
-    let mensaje = `🎾 RESULTADO FINAL 🎾\n\n`;
-    mensaje += `${nombreHome} ganó ${setsGanadosHome} set${setsGanadosHome !== 1 ? 's' : ''}\n`;
-    mensaje += `${nombreGuest} ganó ${setsGanadosGuest} set${setsGanadosGuest !== 1 ? 's' : ''}`;
-
-    alert(mensaje);
-  }
-
   function editarNombre(equipo){
-    const nuevoNombre = prompt("Ingrese el nombre del equipo (" + (equipo === "home" ? "HOME" : "GUEST") + "):", equipo === "home" ? nombreHome : nombreGuest);
-    if(nuevoNombre && nuevoNombre.trim() !== ""){
-      if(equipo === "home") nombreHome = nuevoNombre.trim();
-      else nombreGuest = nuevoNombre.trim();
-      actualizarMarcador();
-    }
+    const nuevo = prompt("Ingrese el nombre del equipo:", equipo === "home" ? nombreHome : nombreGuest);
+    if(nuevo){ equipo === "home" ? nombreHome = nuevo : nombreGuest = nuevo; actualizarMarcador(); }
   }
 
   function deshacer(){
     if(historial.length === 0) return;
     const ultimo = historial.pop();
-    indexHome = ultimo.indexHome;
-    indexGuest = ultimo.indexGuest;
-    setsHome = [...ultimo.setsHome];
-    setsGuest = [...ultimo.setsGuest];
-    setActual = ultimo.setActual;
-    saqueDerecha = ultimo.saqueDerecha;
+    ({ indexHome, indexGuest, setsHome, setsGuest, setActual, saqueDerecha } = ultimo);
     actualizarMarcador();
   }
 
   function resetear(){
     if(!confirm("¿Seguro que quieres resetear el marcador?")) return;
-    indexHome = 0;
-    indexGuest = 0;
-    setsHome = [0,0,0];
-    setsGuest = [0,0,0];
-    setActual = 0;
-    saqueDerecha = true;
-    historial = [];
+    indexHome = 0; indexGuest = 0; setsHome = [0,0,0]; setsGuest = [0,0,0]; setActual = 0; saqueDerecha = true; historial = [];
     actualizarMarcador();
+  }
+
+  function enviarWhatsApp(){
+    let texto = `🎾 *Resultado del Partido de Pádel* 🎾\n\n`;
+    texto += `🏠 ${ nombreHome}: ${setsHome.join(" - ")}\n`;
+    texto += `🧳 ${ nombreGuest}: ${setsGuest.join(" - ")}\n\n`;
+    texto += `📍 E nviado desde el marcador digital` de Cesar;
+    const url = `https://wa.me/50767119564?text=${encodeURIComponent(texto)}`;
+    window.open(url, '_blank');
   }
 
   actualizarMarcador();
