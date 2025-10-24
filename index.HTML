@@ -368,9 +368,9 @@
 /* ========== WHATSAPP ========== */
 function enviarWhatsApp(){
   const now = new Date().toLocaleString();
-  let texto = `🎾 Resultado del Partido de Pádel (${now}) 🎾\n\n`;
-  texto += `🏠 ${nombreHome}: ${setsHome.join(" - ")}\n`;
-  texto += `🧳 ${nombreGuest}: ${setsGuest.join(" - ")}\n`;
+  let texto = `&#127934; Resultado del Partido de Pádel (${now}) &#127934;\n\n`;
+  texto += `&#127968; ${nombreHome}: ${setsHome.join(" - ")}\n`;
+  texto += `&#129651; ${nombreGuest}: ${setsGuest.join(" - ")}\n`;
   texto += `\nEnviado desde el marcador de César.`;
   const url = `https://wa.me/?text=${encodeURIComponent(texto)}`;
   window.open(url, "_blank");
@@ -383,4 +383,5 @@ function enviarWhatsApp(){
 
 </body>
 </html>
+
 
