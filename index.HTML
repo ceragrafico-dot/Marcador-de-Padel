@@ -10,15 +10,13 @@
     background-color: #525252;
     color: white;
   }
-  /* Contenedor general */
   #app {
     height: 100vh;
     display: flex;
     justify-content: center;
     align-items: center;
   }
-
-  /* Modal login wrapper (ventana de login) */
+  /* Login */
   #loginModal {
     position: fixed;
     inset: 0;
@@ -28,8 +26,6 @@
     background: rgba(0,0,0,0.6);
     z-index: 1000;
   }
-
-  /* Login */
   #login {
     background: rgba(0,0,0,0.85);
     padding: 40px 60px;
@@ -40,16 +36,10 @@
     gap: 20px;
     width: 320px;
   }
-  #login h2 {
-    margin: 0;
-    text-align: center;
-    font-size: 2em;
-  }
+  #login h2 { text-align: center; margin: 0; }
   #login input {
-    padding: 10px;
-    font-size: 1.2em;
-    border-radius: 6px;
-    border: none;
+    padding: 10px; font-size: 1.2em;
+    border-radius: 6px; border: none;
   }
   #login button {
     padding: 12px;
@@ -57,28 +47,21 @@
     border: none;
     border-radius: 8px;
     background-color: #25D366;
-    color: white;
+    color: white; font-weight: bold;
     cursor: pointer;
-    font-weight: bold;
     transition: background-color 0.3s ease;
   }
-  #login button:hover {
-    background-color: #1ebe57;
-  }
-  #errorMsg {
-    color: #ff4c4c;
-    font-weight: bold;
-    text-align: center;
-  }
-  /* Marcador oculto al inicio */
+  #login button:hover { background-color: #1ebe57; }
+  #errorMsg { color: #ff4c4c; text-align: center; font-weight: bold; }
+
+  /* Marcador */
   #marcador {
     display: none;
     flex-direction: column;
-    justify-content: center;
     align-items: center;
     height: 100vh;
+    justify-content: center;
   }
-  /* --- Tu CSS original --- */
   .marcador {
     display: flex;
     gap: 60px;
@@ -110,32 +93,27 @@
     letter-spacing: 5px;
     margin-bottom: 15px;
     text-shadow: 0 0 15px currentColor, 0 0 30px currentColor, 0 0 50px currentColor;
-    transition: transform 0.2s ease;
+    transition: transform 0.2s ease, background-color 0.3s ease;
   }
-  .score.animar { transform: scale(1.3); }
+  .score.animar { transform: scale(1.3); background-color: rgba(255,255,255,0.05); }
   .home { color: red; }
   .guest { color: lime; }
-  .sets {
-    display: flex;
-    gap: 20px;
-    margin-top: 10px;
-  }
+  .sets { display: flex; gap: 20px; margin-top: 10px; }
   .set {
     font-size: 3em;
-    width: 60px;
-    height: 60px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: 2px solid #444;
-    border-radius: 10px;
-    background: #111;
+    width: 60px; height: 60px;
+    display: flex; align-items: center; justify-content: center;
+    border: 2px solid #444; border-radius: 10px; background: #111;
     text-shadow: 0 0 15px currentColor, 0 0 30px currentColor;
     transition: all 0.3s ease;
   }
   .set.activo {
     border: 3px solid yellow;
-    box-shadow: 0 0 15px yellow, 0 0 30px yellow;
+    animation: pulso 1s infinite alternate;
+  }
+  @keyframes pulso {
+    from { box-shadow: 0 0 10px yellow; }
+    to { box-shadow: 0 0 25px yellow; }
   }
   .saque {
     position: absolute;
@@ -178,6 +156,14 @@
   .resetBtn { background: orange; color: white; box-shadow: 0 0 15px orange; }
   .undoBtn { background: gray; color: white; box-shadow: 0 0 15px gray; }
   .whatsappBtn { background: #25D366; color: white; box-shadow: 0 0 15px #25D366; }
+  .fullBtn { background: dodgerblue; color: white; box-shadow: 0 0 15px dodgerblue; }
+
+  #cronometro {
+    font-size: 1.5em;
+    margin-top: 15px;
+    letter-spacing: 2px;
+  }
+
   @media (max-width: 768px) {
     .titulo { font-size: 1.5em; }
     .score { font-size: 4em; }
@@ -192,8 +178,7 @@
 <body>
 
 <div id="app">
-
-  <!-- Ventana de login (modal) -->
+  <!-- Login -->
   <div id="loginModal">
     <div id="login">
       <h2>Login Marcador Pádel</h2>
@@ -204,6 +189,7 @@
     </div>
   </div>
 
+  <!-- Marcador -->
   <div id="marcador">
     <div class="marcador">
       <div class="equipo">
@@ -232,53 +218,53 @@
       </div>
     </div>
 
+    <div id="cronometro">00:00:00</div>
+
     <div class="botones">
       <button class="homeBtn" onclick="sumar('home')">+ HOME</button>
       <button class="homeBtn" onclick="restar('home')">- HOME</button>
       <button class="guestBtn" onclick="sumar('guest')">+ GUEST</button>
       <button class="guestBtn" onclick="restar('guest')">- GUEST</button>
       <button class="undoBtn" onclick="deshacer()">UNDO</button>
+      <button class="undoBtn" onclick="cambiarSaque()">CAMBIAR SAQUE</button>
       <button class="resetBtn" onclick="resetear()">RESET</button>
+      <button class="fullBtn" onclick="toggleFullScreen()">🖥️ FULL</button>
       <button class="whatsappBtn" onclick="enviarWhatsApp()">📲 ENVIAR RESULTADO</button>
     </div>
   </div>
 </div>
 
 <script>
-  // Usuario y contraseña fijos (puedes cambiar aquí)
   const USER = "admin";
   const PASS = "padel123";
 
-  function login() {
-    const usuario = document.getElementById('usuario').value.trim();
-    const password = document.getElementById('password').value.trim();
-    const errorMsg = document.getElementById('errorMsg');
+  // Variables del marcador
+  const puntos = [0, 15, 30, 40, 'P'];
+  let indexHome = 0, indexGuest = 0;
+  let setsHome = [0,0,0], setsGuest = [0,0,0];
+  let setActual = 0, saqueDerecha = true;
+  let historial = [], nombreHome = "HOME", nombreGuest = "GUEST";
+  let inicio = null, timerInterval;
 
+  function login(){
+    const usuario = usuarioInput.value.trim();
+    const password = passwordInput.value.trim();
     if(usuario === USER && password === PASS){
-      errorMsg.textContent = "";
-      // si existe el wrapper modal, ocultarlo; si no, ocultar el login original
-      const loginWrap = document.getElementById('loginModal') || document.getElementById('login');
-      if (loginWrap) loginWrap.style.display = 'none';
-      document.getElementById('marcador').style.display = 'flex';
-      // actualizar el marcador ahora que se muestra
+      loginModal.style.display = 'none';
+      marcador.style.display = 'flex';
+      cargarEstado();
       actualizarMarcador();
+      iniciarCronometro();
     } else {
       errorMsg.textContent = "Usuario o contraseña incorrectos";
     }
   }
 
-  // --- Tu código original ---
-  const puntos = [0, 15, 30, 40, 'P'];
-  let indexHome = 0;
-  let indexGuest = 0;
-  let setsHome = [0,0,0];
-  let setsGuest = [0,0,0];
-  let setActual = 0;
-  let saqueDerecha = true;
-  let historial = [];
-  let nombreHome = "HOME";
-  let nombreGuest = "GUEST";
-  let enTieBreak = false;
+  const usuarioInput = document.getElementById("usuario");
+  const passwordInput = document.getElementById("password");
+  const loginModal = document.getElementById("loginModal");
+  const marcador = document.getElementById("marcador");
+  const errorMsg = document.getElementById("errorMsg");
 
   function animarScore(id){
     const el = document.getElementById(id);
@@ -286,112 +272,117 @@
     setTimeout(() => el.classList.remove("animar"), 250);
   }
 
-  function verificarTieBreak(){
-    enTieBreak = (setsHome[setActual] === 6 && setsGuest[setActual] === 6);
-    document.body.style.backgroundColor = enTieBreak ? "#c82a2d" : "#525252";
-  }
-
   function actualizarMarcador(){
     document.getElementById("scoreHome").textContent = puntos[indexHome];
     document.getElementById("scoreGuest").textContent = puntos[indexGuest];
     document.getElementById("nombreHome").textContent = nombreHome;
     document.getElementById("nombreGuest").textContent = nombreGuest;
-    for(let i=0; i<3; i++){
-      const homeSet = document.getElementById("setHome"+(i+1));
-      const guestSet = document.getElementById("setGuest"+(i+1));
-      homeSet.textContent = setsHome[i];
-      guestSet.textContent = setsGuest[i];
-      homeSet.classList.toggle("activo", i === setActual);
-      guestSet.classList.toggle("activo", i === setActual);
+    for(let i=0;i<3;i++){
+      const h=document.getElementById("setHome"+(i+1));
+      const g=document.getElementById("setGuest"+(i+1));
+      h.textContent=setsHome[i]; g.textContent=setsGuest[i];
+      h.classList.toggle("activo",i===setActual);
+      g.classList.toggle("activo",i===setActual);
     }
-    document.getElementById("flechaDer").classList.toggle("activa", saqueDerecha);
-    document.getElementById("flechaIzq").classList.toggle("activa", !saqueDerecha);
-    verificarTieBreak();
+    document.getElementById("flechaDer").classList.toggle("activa",saqueDerecha);
+    document.getElementById("flechaIzq").classList.toggle("activa",!saqueDerecha);
+    guardarEstado();
   }
 
   function sumar(equipo){
-    historial.push({ indexHome, indexGuest, setsHome: [...setsHome], setsGuest: [...setsGuest], setActual, saqueDerecha });
-    saqueDerecha = !saqueDerecha;
-    if(equipo === "home"){
-      if(indexHome < puntos.length - 1){
-        indexHome++;
-        animarScore("scoreHome");
-      } else {
-        indexHome = 0; indexGuest = 0; sumarJuego("home"); saqueDerecha = true;
-      }
-    } else {
-      if(indexGuest < puntos.length - 1){
-        indexGuest++;
-        animarScore("scoreGuest");
-      } else {
-        indexGuest = 0; indexHome = 0; sumarJuego("guest"); saqueDerecha = true;
-      }
+    historial.push({indexHome,indexGuest,setsHome:[...setsHome],setsGuest:[...setsGuest],setActual,saqueDerecha});
+    saqueDerecha=!saqueDerecha;
+    if(equipo==="home"){
+      if(indexHome<puntos.length-1){indexHome++;animarScore("scoreHome");}
+      else{indexHome=0;indexGuest=0;sumarJuego("home");saqueDerecha=true;}
+    }else{
+      if(indexGuest<puntos.length-1){indexGuest++;animarScore("scoreGuest");}
+      else{indexGuest=0;indexHome=0;sumarJuego("guest");saqueDerecha=true;}
     }
     actualizarMarcador();
   }
 
   function restar(equipo){
-    if(equipo === "home" && indexHome > 0) indexHome--;
-    else if(equipo === "guest" && indexGuest > 0) indexGuest--;
+    if(equipo==="home"&&indexHome>0)indexHome--;
+    else if(equipo==="guest"&&indexGuest>0)indexGuest--;
     actualizarMarcador();
   }
 
   function sumarJuego(equipo){
-    if(setActual >= 3) return;
-    if(equipo === "home"){ setsHome[setActual]++; } 
-    else { setsGuest[setActual]++; }
-
-    if((setsHome[setActual] >= 6 || setsGuest[setActual] >= 6) && Math.abs(setsHome[setActual] - setsGuest[setActual]) >= 2){
-      setActual++;
-    }
-    actualizarMarcador();
+    if(equipo==="home")setsHome[setActual]++; else setsGuest[setActual]++;
+    if((setsHome[setActual]>=6||setsGuest[setActual]>=6)&&Math.abs(setsHome[setActual]-setsGuest[setActual])>=2){setActual++;}
   }
 
-  function editarNombre(equipo){
-    const nuevo = prompt("Ingrese el nombre del equipo:", equipo === "home" ? nombreHome : nombreGuest);
-    if(nuevo){ equipo === "home" ? nombreHome = nuevo : nombreGuest = nuevo; actualizarMarcador(); }
+  function editarNombre(e){
+    const nuevo=prompt("Nuevo nombre del equipo:",e==="home"?nombreHome:nombreGuest);
+    if(nuevo){if(e==="home")nombreHome=nuevo;else nombreGuest=nuevo;actualizarMarcador();}
   }
 
   function deshacer(){
-    if(historial.length === 0) return;
-    const ultimo = historial.pop();
-    ({ indexHome, indexGuest, setsHome, setsGuest, setActual, saqueDerecha } = ultimo);
+    if(!historial.length)return;
+    const u=historial.pop();
+    ({indexHome,indexGuest,setsHome,setsGuest,setActual,saqueDerecha}=u);
     actualizarMarcador();
   }
 
   function resetear(){
-    if(!confirm("¿Seguro que quieres resetear el marcador?")) return;
-    indexHome = 0; indexGuest = 0; setsHome = [0,0,0]; setsGuest = [0,0,0]; setActual = 0; saqueDerecha = true; historial = [];
+    if(!confirm("¿Seguro que quieres resetear el marcador?"))return;
+    indexHome=indexGuest=0;setsHome=[0,0,0];setsGuest=[0,0,0];
+    setActual=0;saqueDerecha=true;historial=[];
+    localStorage.removeItem("marcadorPadel");
     actualizarMarcador();
   }
 
-/* ========== WHATSAPP ========== */
-function enviarWhatsApp() {
-  const now = new Date().toLocaleString();
+  function cambiarSaque(){
+    saqueDerecha=!saqueDerecha;
+    actualizarMarcador();
+  }
 
-  // Usamos códigos Unicode directamente (en vez de emojis literales)
-  const emojiPelota = "\uD83C\uDFBE"; // 🎾
-  const emojiCasa = "\uD83C\uDFE0";   // 🏠
-  const emojiMaleta = "\uD83E\uDDF3"; // 🧳
+  function guardarEstado(){
+    const estado={indexHome,indexGuest,setsHome,setsGuest,setActual,saqueDerecha,nombreHome,nombreGuest};
+    localStorage.setItem("marcadorPadel",JSON.stringify(estado));
+  }
 
-  let texto = `${emojiPelota} Resultado del Partido de Pádel (${now}) ${emojiPelota}\n\n`;
-  texto += `${emojiCasa} ${nombreHome}: ${setsHome.join(" - ")}\n`;
-  texto += `${emojiMaleta} ${nombreGuest}: ${setsGuest.join(" - ")}\n`;
-  texto += `\nEnviado desde el marcador de César.`;
+  function cargarEstado(){
+    const data=localStorage.getItem("marcadorPadel");
+    if(data){
+      Object.assign(window,JSON.parse(data));
+    }
+  }
 
-  // Codificamos correctamente todo el texto antes de abrir WhatsApp
-  const url = `https://wa.me/?text=${encodeURIComponent(texto)}`;
-  window.open(url, "_blank");
-}
+  function iniciarCronometro(){
+    inicio=new Date();
+    const cron=document.getElementById("cronometro");
+    clearInterval(timerInterval);
+    timerInterval=setInterval(()=>{
+      const diff=Math.floor((new Date()-inicio)/1000);
+      const h=String(Math.floor(diff/3600)).padStart(2,"0");
+      const m=String(Math.floor((diff%3600)/60)).padStart(2,"0");
+      const s=String(diff%60).padStart(2,"0");
+      cron.textContent=`${h}:${m}:${s}`;
+    },1000);
+  }
 
-  // No mostrar marcador hasta login exitoso
-  // actualizarMarcador();  --> Lo llamamos solo después de login
+  function enviarWhatsApp(){
+    const now=new Date().toLocaleString();
+    const emojiPelota="\uD83C\uDFBE";
+    const emojiCasa="\uD83C\uDFE0";
+    const emojiMaleta="\uD83E\uDDF3";
+    let texto=`${emojiPelota} Resultado del Partido de Pádel (${now}) ${emojiPelota}\n\n`;
+    texto+=`${emojiCasa} ${nombreHome}: ${setsHome.join(" - ")}\n`;
+    texto+=`${emojiMaleta} ${nombreGuest}: ${setsGuest.join(" - ")}\n`;
+    const cron=document.getElementById("cronometro").textContent;
+    texto+=`\nDuración: ${cron}\n\nEnviado desde el marcador de César.`;
+    const numero=prompt("Introduce el número de WhatsApp (sin + ni espacios):");
+    if(!numero)return;
+    const url=`https://wa.me/${numero}?text=${encodeURIComponent(texto)}`;
+    window.open(url,"_blank");
+  }
 
+  function toggleFullScreen(){
+    if(!document.fullscreenElement){document.documentElement.requestFullscreen();}
+    else{document.exitFullscreen();}
+  }
 </script>
-
 </body>
 </html>
-
-
-
-
