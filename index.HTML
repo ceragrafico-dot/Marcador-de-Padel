@@ -366,13 +366,20 @@
   }
 
 /* ========== WHATSAPP ========== */
-function enviarWhatsApp(){
+function enviarWhatsApp() {
   const now = new Date().toLocaleString();
-  let texto = `&#127934; Resultado del Partido de Pádel (${now}) &#127934;\n\n`;
-  texto += `&#127968; ${nombreHome}: ${setsHome.join(" - ")}\n`;
-  texto += `&#129651; ${nombreGuest}: ${setsGuest.join(" - ")}\n`;
+
+  // Usamos códigos Unicode directamente (en vez de emojis literales)
+  const emojiPelota = "\uD83C\uDFBE"; // 🎾
+  const emojiCasa = "\uD83C\uDFE0";   // 🏠
+  const emojiMaleta = "\uD83E\uDDF3"; // 🧳
+
+  let texto = `${emojiPelota} Resultado del Partido de Pádel (${now}) ${emojiPelota}\n\n`;
+  texto += `${emojiCasa} ${nombreHome}: ${setsHome.join(" - ")}\n`;
+  texto += `${emojiMaleta} ${nombreGuest}: ${setsGuest.join(" - ")}\n`;
   texto += `\nEnviado desde el marcador de César.`;
 
+  // Codificamos correctamente todo el texto antes de abrir WhatsApp
   const url = `https://wa.me/?text=${encodeURIComponent(texto)}`;
   window.open(url, "_blank");
 }
@@ -384,6 +391,7 @@ function enviarWhatsApp(){
 
 </body>
 </html>
+
 
 
 
