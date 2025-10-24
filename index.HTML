@@ -372,6 +372,7 @@ function enviarWhatsApp(){
   texto += `&#127968; ${nombreHome}: ${setsHome.join(" - ")}\n`;
   texto += `&#129651; ${nombreGuest}: ${setsGuest.join(" - ")}\n`;
   texto += `\nEnviado desde el marcador de César.`;
+
   const url = `https://wa.me/?text=${encodeURIComponent(texto)}`;
   window.open(url, "_blank");
 }
@@ -383,5 +384,6 @@ function enviarWhatsApp(){
 
 </body>
 </html>
+
 
 
