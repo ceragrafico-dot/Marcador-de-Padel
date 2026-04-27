@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -7,9 +6,9 @@
 <title>Marcador Pádel</title>
 
 <!-- Firebase SDK -->
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js" defer></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js" defer></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js" defer></script>
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Oswald:wght@400;700&family=Rajdhani:wght@400;600;700&display=swap');
@@ -562,13 +561,13 @@ body, html {
   <div id="authBox">
     <h2>🎾 Marcador <span>Pádel</span></h2>
     <div class="auth-tabs">
-      <button class="auth-tab active" id="tabLogin"  onclick="setAuthMode('login')">Iniciar Sesión</button>
-      <button class="auth-tab"        id="tabSignup" onclick="setAuthMode('signup')">Registrarse</button>
+      <button class="auth-tab active" id="tabLogin">Iniciar Sesión</button>
+      <button class="auth-tab"        id="tabSignup">Registrarse</button>
     </div>
     <input type="email"    id="authEmail"    placeholder="Correo electrónico" autocomplete="email" />
     <input type="password" id="authPassword" placeholder="Contraseña"         autocomplete="current-password" />
     <input type="text"     id="authName"     placeholder="Nombre de usuario"  style="display:none" />
-    <button id="authBtn" onclick="doAuth()">Entrar</button>
+    <button id="authBtn">Entrar</button>
     <div id="authError"></div>
     
   </div>
@@ -698,7 +697,7 @@ body, html {
   </div>
 </div>
 
-<script>
+<script defer>
 // ════════════════════════════════════════════════════
 //  FIREBASE CONFIG
 //  ⚠️  REEMPLAZA ESTOS VALORES CON TU PROYECTO FIREBASE
@@ -783,9 +782,7 @@ function doAuth() {
   }
 }
 
-document.getElementById('authPassword').addEventListener('keydown', e => {
-  if (e.key === 'Enter') doAuth();
-});
+// authPassword Enter key handled in INIT block below
 
 function tradFirebaseError(code) {
   const map = {
@@ -1456,6 +1453,13 @@ function escHtml(str) {
 // ════════════════════════════════════════════════════
 //  INIT
 // ════════════════════════════════════════════════════
+
+// Wire auth buttons via addEventListener (safe: runs after all scripts are loaded)
+document.getElementById('tabLogin').addEventListener('click',  () => setAuthMode('login'));
+document.getElementById('tabSignup').addEventListener('click', () => setAuthMode('signup'));
+document.getElementById('authBtn').addEventListener('click',   () => doAuth());
+document.getElementById('authPassword').addEventListener('keydown', e => { if (e.key === 'Enter') doAuth(); });
+
 renderLobbyAuth(); // show buttons immediately before Firebase responds
 listenLiveSessions();
 loadSponsors();
