@@ -557,7 +557,7 @@ body, html {
 <body>
 
 <!-- ══ SCREEN: AUTH ═══════════════════════════════ -->
-<div id="screenAuth" class="screen">
+<div id="screenAuth" class="screen active">
   <div id="authBox">
     <h2>🎾 Marcador <span>Pádel</span></h2>
     <div class="auth-tabs">
@@ -569,12 +569,12 @@ body, html {
     <input type="text"     id="authName"     placeholder="Nombre de usuario"  style="display:none" />
     <button id="authBtn" onclick="doAuth()">Entrar</button>
     <div id="authError"></div>
-    <button class="btn-back-lobby" onclick="showScreen('screenLobby')">← Volver sin registrarse</button>
+    
   </div>
 </div>
 
 <!-- ══ SCREEN: LOBBY ══════════════════════════════ -->
-<div id="screenLobby" class="screen active">
+<div id="screenLobby" class="screen">
 
   <div class="lobby-header">
     <h1>🎾 Marcador <span>Pádel</span></h1>
@@ -803,12 +803,17 @@ function tradFirebaseError(code) {
 // ════════════════════════════════════════════════════
 auth.onAuthStateChanged(user => {
   currentUser = user;
-  renderLobbyAuth();
   if (user) {
+    // Already logged in — go straight to lobby
+    showScreen('screenLobby');
+    renderLobbyAuth();
     document.getElementById('newGamePanel').style.display = 'flex';
     document.getElementById('savedGamesSection').style.display = 'block';
     listenSavedGames();
   } else {
+    // Not logged in — show auth screen
+    showScreen('screenAuth');
+    renderLobbyAuth();
     document.getElementById('newGamePanel').style.display = 'none';
     document.getElementById('savedGamesSection').style.display = 'none';
     document.getElementById('savedGamesList').innerHTML = '';
