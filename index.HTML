@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -782,7 +784,7 @@ function doAuth() {
   }
 }
 
-// authPassword Enter key handled in INIT block below
+// authPassword Enter key wired in INIT block below
 
 function tradFirebaseError(code) {
   const map = {
@@ -1156,7 +1158,7 @@ function mostrarPantallaGanador(ganador, detalle) {
     '<div style="font-family:Oswald,sans-serif;font-size:1.1em;letter-spacing:3px;color:rgba(255,255,255,0.5);">' + escHtml(gameTitle) + '</div>' +
     '<div style="font-family:Oswald,sans-serif;font-size:1.8em;letter-spacing:4px;color:#ffd700;">' + escHtml(detalle) + '</div>' +
     '<div style="display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-top:12px;">' +
-      '<button onclick="document.getElementById('winnerOverlay').remove();irLobby()" style="font-family:Oswald,sans-serif;padding:13px 30px;font-size:1.1em;letter-spacing:3px;border:1px solid rgba(255,255,255,0.2);border-radius:12px;background:rgba(255,255,255,0.1);color:white;cursor:pointer;text-transform:uppercase;">\u{1F3E0} Volver al Lobby</button>' +
+      '<button onclick="document.getElementById(&quot;winnerOverlay&quot;).remove();irLobby()" style="font-family:Oswald,sans-serif;padding:13px 30px;font-size:1.1em;letter-spacing:3px;border:1px solid rgba(255,255,255,0.2);border-radius:12px;background:rgba(255,255,255,0.1);color:white;cursor:pointer;text-transform:uppercase;">\u{1F3E0} Volver al Lobby</button>' +
       waBtn +
     '</div>';
   document.body.appendChild(overlay);
@@ -1453,14 +1455,12 @@ function escHtml(str) {
 // ════════════════════════════════════════════════════
 //  INIT
 // ════════════════════════════════════════════════════
-
-// Wire auth buttons via addEventListener (safe: runs after all scripts are loaded)
-document.getElementById('tabLogin').addEventListener('click',  () => setAuthMode('login'));
-document.getElementById('tabSignup').addEventListener('click', () => setAuthMode('signup'));
-document.getElementById('authBtn').addEventListener('click',   () => doAuth());
+document.getElementById('tabLogin').addEventListener('click',      () => setAuthMode('login'));
+document.getElementById('tabSignup').addEventListener('click',     () => setAuthMode('signup'));
+document.getElementById('authBtn').addEventListener('click',       () => doAuth());
 document.getElementById('authPassword').addEventListener('keydown', e => { if (e.key === 'Enter') doAuth(); });
 
-renderLobbyAuth(); // show buttons immediately before Firebase responds
+renderLobbyAuth();
 listenLiveSessions();
 loadSponsors();
 </script>
