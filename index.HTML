@@ -4,278 +4,619 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Marcador Pádel</title>
+
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Oswald:wght@400;700&family=Rajdhani:wght@400;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@400;700&family=Rajdhani:wght@400;600;700&display=swap');
 
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-  :root {
-    --home: #ff3b3b;
-    --guest: #00e676;
-    --bg: #1a1a2e;
-    --panel: rgba(0,0,0,0.75);
-    --yellow: #ffd700;
-    --cyan: #00e5ff;
-    --gray: #888;
-  }
+:root {
+  --home: #ff3b3b;
+  --guest: #00e676;
+  --bg: #1a1a2e;
+  --panel: rgba(0,0,0,0.75);
+  --yellow: #ffd700;
+  --cyan: #00e5ff;
+  --gray: #888;
+  --sponsor-h: 64px;
+}
 
-  body, html {
-    height: 100%;
-    font-family: 'Rajdhani', sans-serif;
-    background: var(--bg);
-    background-image:
-      radial-gradient(ellipse at 20% 20%, rgba(255,59,59,0.08) 0%, transparent 60%),
-      radial-gradient(ellipse at 80% 80%, rgba(0,230,118,0.08) 0%, transparent 60%),
-      repeating-linear-gradient(
-        0deg,
-        transparent,
-        transparent 59px,
-        rgba(255,255,255,0.02) 59px,
-        rgba(255,255,255,0.02) 60px
-      ),
-      repeating-linear-gradient(
-        90deg,
-        transparent,
-        transparent 59px,
-        rgba(255,255,255,0.02) 59px,
-        rgba(255,255,255,0.02) 60px
-      );
-    color: white;
-    min-height: 100vh;
-  }
+body, html {
+  height: 100%;
+  font-family: 'Rajdhani', sans-serif;
+  background: var(--bg);
+  background-image:
+    radial-gradient(ellipse at 20% 20%, rgba(255,59,59,0.08) 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 80%, rgba(0,230,118,0.08) 0%, transparent 60%),
+    repeating-linear-gradient(0deg,transparent,transparent 59px,rgba(255,255,255,0.02) 59px,rgba(255,255,255,0.02) 60px),
+    repeating-linear-gradient(90deg,transparent,transparent 59px,rgba(255,255,255,0.02) 59px,rgba(255,255,255,0.02) 60px);
+  color: white;
+  min-height: 100vh;
+}
 
-  /* ─── LOGIN ─────────────────────────────────────── */
-  #loginModal {
-    position: fixed; inset: 0;
-    display: flex; align-items: center; justify-content: center;
-    background: rgba(0,0,0,0.85);
-    z-index: 1000;
-    backdrop-filter: blur(6px);
-  }
-  #login {
-    background: rgba(10,10,30,0.95);
-    padding: 50px 60px;
-    border-radius: 20px;
-    border: 1px solid rgba(255,255,255,0.08);
-    box-shadow: 0 0 60px rgba(0,0,0,0.9), 0 0 0 1px rgba(255,255,255,0.04);
-    display: flex; flex-direction: column; gap: 18px;
-    width: 340px;
-  }
-  #login h2 {
-    font-family: 'Oswald', sans-serif;
-    text-align: center; font-size: 1.8em; letter-spacing: 4px;
-    text-transform: uppercase; color: white;
-  }
-  #login h2 span { color: var(--home); }
-  #login input {
-    padding: 12px 16px; font-size: 1.1em; font-family: 'Rajdhani', sans-serif;
-    border-radius: 8px; border: 1px solid rgba(255,255,255,0.15);
-    background: rgba(255,255,255,0.06); color: white;
-    outline: none; transition: border-color 0.2s;
-  }
-  #login input:focus { border-color: var(--cyan); }
-  #login button {
-    padding: 14px; font-size: 1.2em; font-family: 'Oswald', sans-serif;
-    letter-spacing: 3px; border: none; border-radius: 10px;
-    background: linear-gradient(135deg, #00c853, #00e676);
-    color: white; font-weight: 700; cursor: pointer;
-    transition: all 0.25s; text-transform: uppercase;
-    box-shadow: 0 0 20px rgba(0,230,118,0.4);
-  }
-  #login button:hover { transform: translateY(-2px); box-shadow: 0 0 30px rgba(0,230,118,0.6); }
-  #errorMsg { color: var(--home); text-align: center; font-weight: 600; font-size: 1em; min-height: 1.2em; }
+/* ── SCREENS ── */
+.screen { display: none; min-height: 100vh; flex-direction: column; }
+.screen.active { display: flex; }
 
-  /* ─── MARCADOR ──────────────────────────────────── */
-  #marcador {
-    display: none; flex-direction: column;
-    align-items: center; justify-content: center;
-    min-height: 100vh; padding: 20px;
-    gap: 24px;
-  }
+/* ══════════════════════════════════════════
+   PANTALLA: LOBBY
+══════════════════════════════════════════ */
+#screenLobby {
+  align-items: center;
+  padding: 30px 20px calc(var(--sponsor-h) + 20px);
+  gap: 28px;
+}
 
-  .panel {
-    background: var(--panel);
-    border-radius: 24px;
-    border: 1px solid rgba(255,255,255,0.07);
-    box-shadow: 0 8px 60px rgba(0,0,0,0.8);
-    backdrop-filter: blur(10px);
-    padding: 36px 50px 60px;
-    position: relative;
-    width: 100%; max-width: 760px;
-  }
+.lobby-header {
+  text-align: center;
+  padding-top: 10px;
+}
+.lobby-header h1 {
+  font-family: 'Oswald', sans-serif;
+  font-size: 2.4em;
+  letter-spacing: 6px;
+  text-transform: uppercase;
+}
+.lobby-header h1 span { color: var(--home); }
+.lobby-subtitle {
+  color: rgba(255,255,255,0.4);
+  font-size: 0.95em;
+  letter-spacing: 2px;
+  margin-top: 4px;
+}
 
-  .equipos {
-    display: flex; justify-content: center;
-    gap: 60px; flex-wrap: wrap;
-  }
+/* Auth buttons */
+.auth-row {
+  display: flex; gap: 12px; flex-wrap: wrap; justify-content: center;
+}
+.auth-row button {
+  font-family: 'Oswald', sans-serif;
+  padding: 11px 26px; font-size: 1.05em;
+  border: none; border-radius: 10px; cursor: pointer;
+  letter-spacing: 2px; text-transform: uppercase; font-weight: 600;
+  transition: all 0.2s;
+}
+.btn-login  { background: linear-gradient(135deg,#00c853,#00e676); color: white; box-shadow: 0 4px 20px rgba(0,230,118,0.35); }
+.btn-signup { background: rgba(255,255,255,0.08); color: white; border: 1px solid rgba(255,255,255,0.15); }
+.btn-login:hover, .btn-signup:hover { transform: translateY(-2px); }
+.btn-logout { background: rgba(255,59,59,0.15); color: var(--home); border: 1px solid rgba(255,59,59,0.3); }
+.btn-logout:hover { background: rgba(255,59,59,0.25); }
 
-  .equipo {
-    display: flex; flex-direction: column;
-    align-items: center; min-width: 200px;
-  }
+.user-bar {
+  display: flex; align-items: center; gap: 14px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px; padding: 10px 20px;
+  width: 100%; max-width: 680px;
+}
+.user-bar .user-email {
+  flex: 1; font-size: 0.95em; color: var(--cyan); letter-spacing: 1px;
+}
 
-  .titulo {
-    font-family: 'Oswald', sans-serif;
-    font-size: 1.8em; letter-spacing: 4px;
-    text-transform: uppercase;
-    cursor: pointer; padding: 4px 8px;
-    border-bottom: 2px solid transparent;
-    transition: border-color 0.2s;
-    white-space: nowrap; overflow: hidden;
-    text-overflow: ellipsis; max-width: 220px;
-  }
-  .titulo:hover { border-bottom-color: rgba(255,255,255,0.3); }
+/* New game panel */
+.new-game-panel {
+  background: rgba(0,0,0,0.5);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 20px; padding: 24px 28px;
+  width: 100%; max-width: 680px;
+  display: flex; flex-direction: column; gap: 12px;
+}
+.new-game-panel h3 {
+  font-family: 'Oswald', sans-serif;
+  letter-spacing: 3px; text-transform: uppercase;
+  font-size: 1.1em; color: var(--yellow);
+}
+.new-game-panel input {
+  padding: 11px 16px; font-size: 1.05em;
+  font-family: 'Rajdhani', sans-serif;
+  border-radius: 8px; border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(255,255,255,0.06); color: white; outline: none;
+  transition: border-color 0.2s;
+}
+.new-game-panel input:focus { border-color: var(--cyan); }
+.btn-start-game {
+  font-family: 'Oswald', sans-serif;
+  padding: 13px; font-size: 1.15em;
+  letter-spacing: 3px; border: none; border-radius: 10px;
+  background: linear-gradient(135deg,#ff3b3b,#ff6b6b);
+  color: white; font-weight: 700; cursor: pointer;
+  transition: all 0.25s; text-transform: uppercase;
+  box-shadow: 0 0 20px rgba(255,59,59,0.4);
+}
+.btn-start-game:hover { transform: translateY(-2px); box-shadow: 0 0 30px rgba(255,59,59,0.6); }
 
-  .score {
-    font-family: 'Oswald', sans-serif;
-    font-size: 7em; font-weight: 700; line-height: 1;
-    letter-spacing: 4px; margin: 12px 0;
-    text-shadow: 0 0 20px currentColor, 0 0 50px currentColor;
-    transition: transform 0.15s ease;
-    min-width: 140px; text-align: center;
-  }
-  .score.animar { transform: scale(1.25); }
-  .home  { color: var(--home); }
-  .guest { color: var(--guest); }
+/* Live sessions grid */
+.sessions-section {
+  width: 100%; max-width: 680px;
+}
+.sessions-section h3 {
+  font-family: 'Oswald', sans-serif;
+  letter-spacing: 3px; text-transform: uppercase;
+  font-size: 1em; color: rgba(255,255,255,0.5);
+  margin-bottom: 12px;
+}
+.sessions-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 12px;
+}
+.session-card {
+  background: rgba(0,229,255,0.05);
+  border: 1px solid rgba(0,229,255,0.2);
+  border-radius: 14px; padding: 16px 18px;
+  cursor: pointer; transition: all 0.2s;
+  display: flex; flex-direction: column; gap: 6px;
+}
+.session-card:hover {
+  background: rgba(0,229,255,0.1);
+  border-color: rgba(0,229,255,0.5);
+  transform: translateY(-2px);
+}
+.session-live-dot {
+  display: inline-block; width: 8px; height: 8px;
+  border-radius: 50%; background: #00e676;
+  box-shadow: 0 0 8px #00e676;
+  animation: blink 1.2s infinite;
+  margin-right: 6px;
+}
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.4} }
+.session-label {
+  font-size: 0.75em; letter-spacing: 2px; color: var(--cyan); text-transform: uppercase;
+}
+.session-title {
+  font-family: 'Oswald', sans-serif; font-size: 1.15em; letter-spacing: 1px;
+}
+.session-score-preview {
+  font-family: 'Oswald', sans-serif; font-size: 0.9em;
+  color: rgba(255,255,255,0.5);
+}
+.no-sessions {
+  color: rgba(255,255,255,0.3); font-size: 0.9em;
+  font-style: italic; padding: 10px 0;
+}
 
-  /* Deuce / Ventaja badge */
-  .badge {
-    font-size: 0.8em; font-family: 'Oswald', sans-serif;
-    letter-spacing: 2px; padding: 3px 10px;
-    border-radius: 20px; text-transform: uppercase;
-    margin-bottom: 4px; min-height: 26px;
-    transition: all 0.3s;
-  }
-  .badge.deuce { background: rgba(255,215,0,0.2); color: var(--yellow); border: 1px solid var(--yellow); }
-  .badge.ventaja { background: rgba(0,229,255,0.15); color: var(--cyan); border: 1px solid var(--cyan); }
-  .badge.empty { opacity: 0; }
+/* My saved games */
+.saved-games-section {
+  width: 100%; max-width: 680px;
+}
+.saved-games-section h3 {
+  font-family: 'Oswald', sans-serif;
+  letter-spacing: 3px; text-transform: uppercase;
+  font-size: 1em; color: rgba(255,255,255,0.5);
+  margin-bottom: 12px;
+}
+.saved-game-row {
+  display: flex; align-items: center; gap: 12px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 12px; padding: 12px 16px;
+  margin-bottom: 8px; cursor: pointer;
+  transition: background 0.2s;
+}
+.saved-game-row:hover { background: rgba(255,255,255,0.07); }
+.saved-game-title { flex: 1; font-family: 'Oswald', sans-serif; font-size: 1.05em; letter-spacing: 1px; }
+.saved-game-meta { font-size: 0.8em; color: rgba(255,255,255,0.35); }
+.btn-delete-game {
+  background: none; border: none; color: rgba(255,59,59,0.5);
+  cursor: pointer; font-size: 1.1em; padding: 4px;
+  transition: color 0.2s;
+}
+.btn-delete-game:hover { color: var(--home); }
 
-  .sets { display: flex; gap: 12px; margin-top: 10px; }
-  .set {
-    font-family: 'Oswald', sans-serif;
-    font-size: 2.6em; width: 58px; height: 58px;
-    display: flex; align-items: center; justify-content: center;
-    border: 2px solid #333; border-radius: 12px;
-    background: rgba(0,0,0,0.4);
-    text-shadow: 0 0 12px currentColor;
-    transition: all 0.3s;
-    position: relative;
-  }
-  .set.activo {
-    border: 2px solid var(--yellow);
-    animation: pulso 1.2s infinite alternate;
-  }
-  .set.tiebreak { font-size: 1.6em; }
-  @keyframes pulso {
-    from { box-shadow: 0 0 8px var(--yellow); }
-    to   { box-shadow: 0 0 22px var(--yellow), 0 0 40px rgba(255,215,0,0.3); }
-  }
+/* ══════════════════════════════════════════
+   PANTALLA: AUTH MODAL
+══════════════════════════════════════════ */
+#screenAuth {
+  align-items: center; justify-content: center;
+}
+#authBox {
+  background: rgba(10,10,30,0.95);
+  padding: 48px 56px;
+  border-radius: 20px;
+  border: 1px solid rgba(255,255,255,0.08);
+  box-shadow: 0 0 60px rgba(0,0,0,0.9);
+  display: flex; flex-direction: column; gap: 16px;
+  width: 340px;
+}
+#authBox h2 {
+  font-family: 'Oswald', sans-serif;
+  text-align: center; font-size: 1.7em; letter-spacing: 4px;
+  text-transform: uppercase;
+}
+#authBox h2 span { color: var(--home); }
+#authBox input {
+  padding: 12px 16px; font-size: 1.05em;
+  font-family: 'Rajdhani', sans-serif;
+  border-radius: 8px; border: 1px solid rgba(255,255,255,0.15);
+  background: rgba(255,255,255,0.06); color: white;
+  outline: none; transition: border-color 0.2s;
+}
+#authBox input:focus { border-color: var(--cyan); }
+.auth-tabs {
+  display: flex; gap: 0;
+  border-radius: 10px; overflow: hidden;
+  border: 1px solid rgba(255,255,255,0.1);
+}
+.auth-tab {
+  flex: 1; padding: 10px;
+  font-family: 'Oswald', sans-serif; font-size: 1em;
+  letter-spacing: 2px; text-transform: uppercase;
+  border: none; cursor: pointer; transition: all 0.2s;
+  background: rgba(255,255,255,0.04); color: rgba(255,255,255,0.5);
+}
+.auth-tab.active { background: var(--cyan); color: #000; font-weight: 700; }
+#authBtn {
+  padding: 13px; font-size: 1.15em;
+  font-family: 'Oswald', sans-serif; letter-spacing: 3px;
+  border: none; border-radius: 10px;
+  background: linear-gradient(135deg,#00c853,#00e676);
+  color: white; font-weight: 700; cursor: pointer;
+  transition: all 0.25s; text-transform: uppercase;
+  box-shadow: 0 0 20px rgba(0,230,118,0.4);
+}
+#authBtn:hover { transform: translateY(-2px); }
+#authError { color: var(--home); text-align: center; font-weight: 600; font-size: 0.95em; min-height: 1.2em; }
+.btn-back-lobby {
+  background: none; border: none; color: rgba(255,255,255,0.4);
+  cursor: pointer; font-family: 'Rajdhani', sans-serif;
+  font-size: 0.95em; text-align: center; text-decoration: underline;
+  margin-top: -4px;
+}
+.btn-back-lobby:hover { color: white; }
 
-  /* Divisor central */
-  .divisor {
-    display: flex; flex-direction: column;
-    align-items: center; justify-content: center;
-    gap: 8px; color: rgba(255,255,255,0.2);
-    font-size: 2em;
-  }
+/* ══════════════════════════════════════════
+   PANTALLA: MARCADOR
+══════════════════════════════════════════ */
+#screenMarcador {
+  align-items: center;
+  justify-content: center;
+  padding: 20px 20px calc(var(--sponsor-h) + 16px);
+  gap: 20px;
+}
 
-  /* Saque */
-  .saque {
-    position: absolute; bottom: 18px; left: 0; right: 0;
-    display: flex; justify-content: space-between;
-    padding: 0 40px;
-  }
-  .flecha {
-    font-size: 2em; opacity: 0.15;
-    text-shadow: 0 0 8px white;
-    transition: all 0.3s;
-  }
-  .flecha.activa {
-    opacity: 1;
-    text-shadow: 0 0 12px var(--cyan), 0 0 30px var(--cyan);
-    animation: parpadeo 1.8s infinite;
-  }
-  @keyframes parpadeo {
-    0%,100% { opacity: 1; }
-    50% { opacity: 0.6; }
-  }
+.panel {
+  background: var(--panel);
+  border-radius: 24px;
+  border: 1px solid rgba(255,255,255,0.07);
+  box-shadow: 0 8px 60px rgba(0,0,0,0.8);
+  backdrop-filter: blur(10px);
+  padding: 36px 50px 60px;
+  position: relative;
+  width: 100%; max-width: 760px;
+}
 
-  /* Cronómetro */
-  #cronometro {
-    font-family: 'Oswald', sans-serif;
-    font-size: 1.6em; letter-spacing: 4px;
-    color: rgba(255,255,255,0.55);
-  }
+.game-title-bar {
+  text-align: center;
+  font-family: 'Oswald', sans-serif;
+  font-size: 0.9em; letter-spacing: 3px;
+  color: rgba(255,255,255,0.3); text-transform: uppercase;
+  margin-bottom: 10px;
+}
 
-  /* Botones */
-  .botones {
-    display: flex; gap: 10px; flex-wrap: wrap;
-    justify-content: center;
-    width: 100%; max-width: 760px;
-  }
-  .botones button {
-    font-family: 'Oswald', sans-serif;
-    padding: 11px 22px; font-size: 1.1em;
-    border: none; border-radius: 10px;
-    cursor: pointer; font-weight: 600;
-    letter-spacing: 1.5px; text-transform: uppercase;
-    transition: transform 0.15s, box-shadow 0.15s;
-    position: relative; overflow: hidden;
-  }
-  .botones button::after {
-    content: ''; position: absolute; inset: 0;
-    background: rgba(255,255,255,0);
-    transition: background 0.15s;
-  }
-  .botones button:hover { transform: translateY(-3px); }
-  .botones button:hover::after { background: rgba(255,255,255,0.08); }
-  .botones button:active { transform: translateY(0); }
+.equipos {
+  display: flex; justify-content: center;
+  gap: 60px; flex-wrap: wrap;
+}
 
-  .homeBtn  { background: var(--home);  color: white; box-shadow: 0 4px 20px rgba(255,59,59,0.4); }
-  .guestBtn { background: var(--guest); color: #000;  box-shadow: 0 4px 20px rgba(0,230,118,0.4); }
-  .resetBtn { background: #ff8f00; color: white; box-shadow: 0 4px 20px rgba(255,143,0,0.4); }
-  .undoBtn  { background: #455a64; color: white; box-shadow: 0 4px 16px rgba(0,0,0,0.5); }
-  .whatsBtn { background: #25D366;  color: white; box-shadow: 0 4px 20px rgba(37,211,102,0.4); }
-  .fullBtn  { background: #1565c0;  color: white; box-shadow: 0 4px 20px rgba(21,101,192,0.4); }
+.equipo {
+  display: flex; flex-direction: column;
+  align-items: center; min-width: 200px;
+}
 
-  /* Set ganado flash */
-  @keyframes setFlash {
-    0%   { background: rgba(255,215,0,0.3); }
-    100% { background: transparent; }
-  }
-  .panel.setflash { animation: setFlash 0.8s ease; }
+.titulo {
+  font-family: 'Oswald', sans-serif;
+  font-size: 1.8em; letter-spacing: 4px;
+  text-transform: uppercase;
+  cursor: pointer; padding: 4px 8px;
+  border-bottom: 2px solid transparent;
+  transition: border-color 0.2s;
+  white-space: nowrap; overflow: hidden;
+  text-overflow: ellipsis; max-width: 220px;
+}
+.titulo.readonly { cursor: default; }
+.titulo:not(.readonly):hover { border-bottom-color: rgba(255,255,255,0.3); }
 
-  /* Responsive */
-  @media (max-width: 620px) {
-    .panel { padding: 24px 16px 56px; }
-    .equipos { gap: 24px; }
-    .score { font-size: 4.5em; min-width: 100px; }
-    .titulo { font-size: 1.3em; }
-    .set { font-size: 2em; width: 46px; height: 46px; }
-    .saque { padding: 0 20px; }
-    .botones button { padding: 9px 14px; font-size: 0.95em; }
-    .divisor { font-size: 1.5em; }
-  }
+.score {
+  font-family: 'Oswald', sans-serif;
+  font-size: 7em; font-weight: 700; line-height: 1;
+  letter-spacing: 4px; margin: 12px 0;
+  text-shadow: 0 0 20px currentColor, 0 0 50px currentColor;
+  transition: transform 0.15s ease;
+  min-width: 140px; text-align: center;
+}
+.score.animar { transform: scale(1.25); }
+.home  { color: var(--home); }
+.guest { color: var(--guest); }
+
+.badge {
+  font-size: 0.8em; font-family: 'Oswald', sans-serif;
+  letter-spacing: 2px; padding: 3px 10px;
+  border-radius: 20px; text-transform: uppercase;
+  margin-bottom: 4px; min-height: 26px; transition: all 0.3s;
+}
+.badge.deuce  { background: rgba(255,215,0,0.2); color: var(--yellow); border: 1px solid var(--yellow); }
+.badge.ventaja{ background: rgba(0,229,255,0.15); color: var(--cyan);   border: 1px solid var(--cyan); }
+.badge.empty  { opacity: 0; }
+
+.sets { display: flex; gap: 12px; margin-top: 10px; }
+.set {
+  font-family: 'Oswald', sans-serif;
+  font-size: 2.6em; width: 58px; height: 58px;
+  display: flex; align-items: center; justify-content: center;
+  border: 2px solid #333; border-radius: 12px;
+  background: rgba(0,0,0,0.4);
+  text-shadow: 0 0 12px currentColor; transition: all 0.3s;
+}
+.set.activo {
+  border: 2px solid var(--yellow);
+  animation: pulso 1.2s infinite alternate;
+}
+.set.tiebreak { font-size: 1.6em; }
+@keyframes pulso {
+  from { box-shadow: 0 0 8px var(--yellow); }
+  to   { box-shadow: 0 0 22px var(--yellow), 0 0 40px rgba(255,215,0,0.3); }
+}
+
+.divisor {
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 8px; color: rgba(255,255,255,0.2);
+  font-size: 2em;
+}
+
+.saque {
+  position: absolute; bottom: 18px; left: 0; right: 0;
+  display: flex; justify-content: space-between; padding: 0 40px;
+}
+.flecha {
+  font-size: 2em; opacity: 0.15;
+  text-shadow: 0 0 8px white; transition: all 0.3s;
+}
+.flecha.activa {
+  opacity: 1;
+  text-shadow: 0 0 12px var(--cyan), 0 0 30px var(--cyan);
+  animation: parpadeo 1.8s infinite;
+}
+@keyframes parpadeo { 0%,100%{opacity:1} 50%{opacity:0.6} }
+
+#cronometro {
+  font-family: 'Oswald', sans-serif;
+  font-size: 1.6em; letter-spacing: 4px;
+  color: rgba(255,255,255,0.55);
+}
+
+/* Viewer badge */
+.viewer-badge {
+  background: rgba(0,229,255,0.1);
+  border: 1px solid rgba(0,229,255,0.3);
+  border-radius: 20px; padding: 6px 18px;
+  font-size: 0.85em; letter-spacing: 2px; color: var(--cyan);
+  text-transform: uppercase;
+}
+.viewer-badge span { animation: blink 1.2s infinite; display: inline-block; }
+
+.botones {
+  display: flex; gap: 10px; flex-wrap: wrap;
+  justify-content: center; width: 100%; max-width: 760px;
+}
+.botones button {
+  font-family: 'Oswald', sans-serif;
+  padding: 11px 22px; font-size: 1.1em;
+  border: none; border-radius: 10px;
+  cursor: pointer; font-weight: 600;
+  letter-spacing: 1.5px; text-transform: uppercase;
+  transition: transform 0.15s, box-shadow 0.15s;
+  position: relative; overflow: hidden;
+}
+.botones button::after {
+  content:''; position:absolute; inset:0;
+  background: rgba(255,255,255,0); transition: background 0.15s;
+}
+.botones button:hover { transform: translateY(-3px); }
+.botones button:hover::after { background: rgba(255,255,255,0.08); }
+.botones button:active { transform: translateY(0); }
+
+.homeBtn  { background: var(--home);  color: white; box-shadow: 0 4px 20px rgba(255,59,59,0.4); }
+.guestBtn { background: var(--guest); color: #000;  box-shadow: 0 4px 20px rgba(0,230,118,0.4); }
+.resetBtn { background: #ff8f00; color: white; box-shadow: 0 4px 20px rgba(255,143,0,0.4); }
+.undoBtn  { background: #455a64; color: white; box-shadow: 0 4px 16px rgba(0,0,0,0.5); }
+.whatsBtn { background: #25D366; color: white; box-shadow: 0 4px 20px rgba(37,211,102,0.4); }
+.fullBtn  { background: #1565c0; color: white; box-shadow: 0 4px 20px rgba(21,101,192,0.4); }
+.lobbyBtn { background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.15); }
+
+@keyframes setFlash {
+  0%   { background: rgba(255,215,0,0.3); }
+  100% { background: transparent; }
+}
+.panel.setflash { animation: setFlash 0.8s ease; }
+
+/* ══════════════════════════════════════════
+   BARRA DE PATROCINADORES (global)
+══════════════════════════════════════════ */
+#sponsorBar {
+  position: fixed; bottom: 0; left: 0; right: 0;
+  height: var(--sponsor-h);
+  background: rgba(5,5,20,0.95);
+  border-top: 1px solid rgba(255,255,255,0.08);
+  backdrop-filter: blur(10px);
+  display: flex; align-items: center;
+  overflow: hidden; z-index: 500;
+}
+
+.sponsor-track {
+  display: flex; align-items: center;
+  gap: 0;
+  animation: scrollSponsors 28s linear infinite;
+  white-space: nowrap;
+}
+.sponsor-track:hover { animation-play-state: paused; }
+
+@keyframes scrollSponsors {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+.sponsor-item {
+  display: inline-flex; align-items: center; justify-content: center;
+  padding: 0 36px; height: var(--sponsor-h);
+  border-right: 1px solid rgba(255,255,255,0.05);
+  min-width: 160px;
+}
+.sponsor-logo {
+  font-family: 'Oswald', sans-serif;
+  font-size: 1em; letter-spacing: 3px;
+  text-transform: uppercase; font-weight: 700;
+  opacity: 0.55; transition: opacity 0.2s;
+  color: white;
+}
+.sponsor-logo:hover { opacity: 1; }
+.sponsor-logo.colored { color: var(--yellow); }
+.sponsor-logo.colored2 { color: var(--cyan); }
+.sponsor-logo.colored3 { color: #ff8f00; }
+
+/* Sponsor add button (for authenticated owner) */
+.sponsor-add-btn {
+  position: fixed; bottom: 70px; right: 16px;
+  background: rgba(255,215,0,0.15);
+  border: 1px solid rgba(255,215,0,0.4);
+  border-radius: 50%; width: 38px; height: 38px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; font-size: 1.2em; z-index: 600;
+  transition: all 0.2s; color: var(--yellow);
+  display: none;
+}
+.sponsor-add-btn:hover { background: rgba(255,215,0,0.3); }
+
+/* Sponsor modal */
+#sponsorModal {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,0.7); z-index: 700;
+  align-items: center; justify-content: center;
+}
+#sponsorModal.open { display: flex; }
+.sponsor-modal-box {
+  background: rgba(10,10,30,0.98);
+  border: 1px solid rgba(255,215,0,0.2);
+  border-radius: 20px; padding: 36px;
+  width: 340px; display: flex; flex-direction: column; gap: 14px;
+}
+.sponsor-modal-box h3 {
+  font-family: 'Oswald', sans-serif;
+  font-size: 1.3em; letter-spacing: 3px;
+  text-transform: uppercase; color: var(--yellow);
+}
+.sponsor-modal-box input {
+  padding: 11px 14px; font-size: 1em;
+  font-family: 'Rajdhani', sans-serif;
+  border-radius: 8px; border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(255,255,255,0.06); color: white; outline: none;
+}
+.sponsor-modal-box input:focus { border-color: var(--yellow); }
+.btn-add-sponsor {
+  padding: 12px; font-family: 'Oswald', sans-serif;
+  font-size: 1.1em; letter-spacing: 2px; border: none;
+  border-radius: 10px; cursor: pointer; text-transform: uppercase;
+  background: linear-gradient(135deg,#e65c00,#ffd700);
+  color: white; font-weight: 700;
+}
+.btn-close-sponsor {
+  background: none; border: none; color: rgba(255,255,255,0.4);
+  cursor: pointer; font-size: 0.9em; text-align: center;
+}
+
+.sponsor-list { display: flex; flex-direction: column; gap: 6px; max-height: 160px; overflow-y: auto; }
+.sponsor-list-item {
+  display: flex; align-items: center; justify-content: space-between;
+  background: rgba(255,255,255,0.04); border-radius: 8px; padding: 8px 12px;
+  font-size: 0.9em;
+}
+.btn-remove-sponsor {
+  background: none; border: none; color: rgba(255,59,59,0.5);
+  cursor: pointer; font-size: 1em;
+}
+.btn-remove-sponsor:hover { color: var(--home); }
+
+/* Responsive */
+@media (max-width: 620px) {
+  .panel { padding: 24px 16px 56px; }
+  .equipos { gap: 24px; }
+  .score { font-size: 4.5em; min-width: 100px; }
+  .titulo { font-size: 1.3em; }
+  .set { font-size: 2em; width: 46px; height: 46px; }
+  .saque { padding: 0 20px; }
+  .botones button { padding: 9px 14px; font-size: 0.95em; }
+  .divisor { font-size: 1.5em; }
+  #authBox { width: 90%; padding: 36px 24px; }
+}
 </style>
 </head>
 <body>
 
-<!-- ─── LOGIN ──────────────────────────────────── -->
-<div id="loginModal">
-  <div id="login">
-    <h2>🎾 Marcador de <span>César</span></h2>
-    <input type="text"     id="usuario"  placeholder="Usuario"     autocomplete="username" />
-    <input type="password" id="password" placeholder="Contraseña"  autocomplete="current-password" />
-    <button onclick="login()">Entrar</button>
-    <div id="errorMsg"></div>
+<!-- ══ SCREEN: AUTH ═══════════════════════════════ -->
+<div id="screenAuth" class="screen">
+  <div id="authBox">
+    <h2>🎾 Marcador <span>Pádel</span></h2>
+    <div class="auth-tabs">
+      <button class="auth-tab active" id="tabLogin"  onclick="setAuthMode('login')">Iniciar Sesión</button>
+      <button class="auth-tab"        id="tabSignup" onclick="setAuthMode('signup')">Registrarse</button>
+    </div>
+    <input type="email"    id="authEmail"    placeholder="Correo electrónico" autocomplete="email" />
+    <input type="password" id="authPassword" placeholder="Contraseña"         autocomplete="current-password" />
+    <input type="text"     id="authName"     placeholder="Nombre de usuario"  style="display:none" />
+    <button id="authBtn" onclick="doAuth()">Entrar</button>
+    <div id="authError"></div>
+    <button class="btn-back-lobby" onclick="showScreen('screenLobby')">← Volver sin registrarse</button>
   </div>
 </div>
 
-<!-- ─── MARCADOR ────────────────────────────────── -->
-<div id="marcador">
-  <div class="panel" id="panel">
-    <div class="equipos">
+<!-- ══ SCREEN: LOBBY ══════════════════════════════ -->
+<div id="screenLobby" class="screen active">
 
+  <div class="lobby-header">
+    <h1>🎾 Marcador <span>Pádel</span></h1>
+    <div class="lobby-subtitle">Sistema de marcador en vivo</div>
+  </div>
+
+  <!-- User bar / auth -->
+  <div id="lobbyAuthArea" style="width:100%;max-width:680px;">
+    <!-- populated by JS -->
+  </div>
+
+  <!-- New game (only when logged in) -->
+  <div id="newGamePanel" class="new-game-panel" style="display:none;">
+    <h3>➕ Nuevo Partido</h3>
+    <input type="text" id="gameTitle" placeholder="Título del partido (ej: Final Club Copa 2025)" maxlength="60" />
+    <input type="text" id="gameTeamHome"  placeholder="Nombre equipo HOME" maxlength="24" />
+    <input type="text" id="gameTeamGuest" placeholder="Nombre equipo GUEST" maxlength="24" />
+    <button class="btn-start-game" onclick="startNewGame()">▶ Iniciar Marcador</button>
+  </div>
+
+  <!-- Live sessions -->
+  <div class="sessions-section">
+    <h3>🔴 Partidos en Vivo</h3>
+    <div id="sessionsGrid" class="sessions-grid">
+      <div class="no-sessions">Cargando sesiones...</div>
+    </div>
+  </div>
+
+  <!-- My saved games (only when logged in) -->
+  <div id="savedGamesSection" class="saved-games-section" style="display:none;">
+    <h3>📁 Mis Partidos Guardados</h3>
+    <div id="savedGamesList"></div>
+  </div>
+
+</div>
+
+<!-- ══ SCREEN: MARCADOR ═══════════════════════════ -->
+<div id="screenMarcador" class="screen">
+
+  <div class="panel" id="panel">
+    <div class="game-title-bar" id="gameTitleBar"></div>
+    <div class="equipos">
       <div class="equipo">
         <div class="titulo home"  id="nombreHome"  onclick="editarNombre('home')">HOME</div>
         <div class="badge empty"  id="badgeHome"></div>
@@ -286,11 +627,9 @@
           <div id="setHome3" class="set home">0</div>
         </div>
       </div>
-
       <div class="divisor">
         <span style="font-size:0.6em;letter-spacing:2px;opacity:0.4;font-family:'Oswald',sans-serif;">VS</span>
       </div>
-
       <div class="equipo">
         <div class="titulo guest" id="nombreGuest" onclick="editarNombre('guest')">GUEST</div>
         <div class="badge empty"  id="badgeGuest"></div>
@@ -301,7 +640,6 @@
           <div id="setGuest3" class="set guest">0</div>
         </div>
       </div>
-
     </div>
     <div class="saque">
       <div id="flechaIzq" class="flecha">⬅</div>
@@ -311,7 +649,13 @@
 
   <div id="cronometro">00:00:00</div>
 
-  <div class="botones">
+  <!-- Viewer badge shown when in view-only mode -->
+  <div id="viewerBadge" class="viewer-badge" style="display:none;">
+    <span>●</span> Modo espectador — en vivo
+  </div>
+
+  <!-- Owner controls -->
+  <div id="ownerBotones" class="botones">
     <button class="homeBtn"  onclick="sumar('home')">+ HOME</button>
     <button class="homeBtn"  onclick="restar('home')">− HOME</button>
     <button class="guestBtn" onclick="sumar('guest')">+ GUEST</button>
@@ -321,361 +665,712 @@
     <button class="resetBtn" onclick="resetear()">↺ RESET</button>
     <button class="fullBtn"  onclick="toggleFullScreen()">⛶ FULL</button>
     <button class="whatsBtn" onclick="enviarWhatsApp()">📲 ENVIAR</button>
+    <button class="lobbyBtn" onclick="irLobby()">🏠 LOBBY</button>
+  </div>
+
+  <!-- Viewer back button -->
+  <div id="viewerBotones" class="botones" style="display:none;">
+    <button class="fullBtn"  onclick="toggleFullScreen()">⛶ FULL</button>
+    <button class="lobbyBtn" onclick="irLobby()">🏠 LOBBY</button>
+  </div>
+
+</div>
+
+<!-- ══ SPONSOR BAR ════════════════════════════════ -->
+<div id="sponsorBar">
+  <div class="sponsor-track" id="sponsorTrack">
+    <!-- populated by JS -->
+  </div>
+</div>
+
+<!-- ══ SPONSOR MODAL ══════════════════════════════ -->
+<button class="sponsor-add-btn" id="sponsorAddBtn" onclick="openSponsorModal()" title="Gestionar patrocinadores">⚙</button>
+
+<div id="sponsorModal">
+  <div class="sponsor-modal-box">
+    <h3>🎯 Patrocinadores</h3>
+    <input type="text" id="sponsorName"  placeholder="Nombre del patrocinador" maxlength="30" />
+    <input type="text" id="sponsorColor" placeholder="Color (ej: #ffd700, cyan, red)" maxlength="20" />
+    <button class="btn-add-sponsor" onclick="addSponsor()">+ Agregar</button>
+    <div class="sponsor-list" id="sponsorList"></div>
+    <button class="btn-close-sponsor" onclick="closeSponsorModal()">Cerrar</button>
   </div>
 </div>
 
 <script>
-// ─── Credenciales ──────────────────────────────────────────────────────────
-const USER = "admin";
-const PASS = "padel123";
+// ════════════════════════════════════════════════════
+//  FIREBASE CONFIG
+//  ⚠️  REEMPLAZA ESTOS VALORES CON TU PROYECTO FIREBASE
+// ════════════════════════════════════════════════════
+const firebaseConfig = {
+  apiKey: "AIzaSyDpSnx0D9b7KX4g0bhy4X8zExhrWPJwZbw",
+  authDomain: "contador-de-padel.firebaseapp.com",
+  databaseURL: "https://contador-de-padel-default-rtdb.firebaseio.com",
+  projectId: "contador-de-padel",
+  storageBucket: "contador-de-padel.firebasestorage.app",
+  messagingSenderId: "316675340153",
+  appId: "1:316675340153:web:b658ec42d5a7a2d4fb21a8",
+  measurementId: "G-49KZNXWMTY"
+};
 
-// ─── Estado ────────────────────────────────────────────────────────────────
-// puntos[index] → valor a mostrar
-// índices: 0=0, 1=15, 2=30, 3=40, 4=AD (ventaja), 5=WIN (señal interna)
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db   = firebase.database();
+
+// ════════════════════════════════════════════════════
+//  ESTADO GLOBAL
+// ════════════════════════════════════════════════════
+let currentUser     = null;
+let currentGameId   = null;   // Firebase key del partido activo
+let isOwner         = false;  // ¿puedo editar este partido?
+let sessionListener = null;   // listener de tiempo real
+let sessionsListener= null;
+
 const PUNTOS_DISPLAY = ["0","15","30","40","AD","W"];
-// index máximo antes de ganar el punto: index 4 (AD) → siguiente es ganar
-// Si hay deuce (ambos en 3=40), el siguiente punto da ventaja, no gana directo.
 
-let idxHome = 0, idxGuest = 0;
-let setsHome  = [0,0,0], setsGuest = [0,0,0];
-let setActual = 0;
-let saqueDerecha = true;
-let historial = [];
-let nombreHome = "HOME", nombreGuest = "GUEST";
-let inicio = null, timerInterval = null;
-let enTiebreak = false; // si el juego actual es tie-break
+let idxHome=0, idxGuest=0;
+let setsHome=[0,0,0], setsGuest=[0,0,0];
+let setActual=0, saqueDerecha=true, enTiebreak=false;
+let historial=[];
+let nombreHome="HOME", nombreGuest="GUEST";
+let inicio=null, timerInterval=null;
+let gameTitle = "";
 
-// ─── Helpers: estado de deuce / ventaja ────────────────────────────────────
-function esDeuce()    { return idxHome === 3 && idxGuest === 3; }
-function hayVentaja() { return (idxHome === 4 && idxGuest === 3) || (idxHome === 3 && idxGuest === 4); }
-function quienTieneVentaja() {
-  if (idxHome === 4 && idxGuest === 3) return "home";
-  if (idxHome === 3 && idxGuest === 4) return "guest";
-  return null;
+// ════════════════════════════════════════════════════
+//  PANTALLAS
+// ════════════════════════════════════════════════════
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
 }
 
-// ─── Login ─────────────────────────────────────────────────────────────────
-function login() {
-  const usuario  = document.getElementById("usuario").value.trim();
-  const password = document.getElementById("password").value.trim();
-  if (usuario === USER && password === PASS) {
-    document.getElementById("loginModal").style.display = "none";
-    document.getElementById("marcador").style.display   = "flex";
-    cargarEstado();
-    actualizarMarcador();
-    iniciarCronometro();
+// ════════════════════════════════════════════════════
+//  AUTH
+// ════════════════════════════════════════════════════
+let authMode = 'login';
+function setAuthMode(mode) {
+  authMode = mode;
+  document.getElementById('tabLogin').classList.toggle('active', mode==='login');
+  document.getElementById('tabSignup').classList.toggle('active', mode==='signup');
+  document.getElementById('authName').style.display = mode==='signup' ? 'block' : 'none';
+  document.getElementById('authBtn').textContent = mode==='login' ? 'Iniciar Sesión' : 'Registrarse';
+  document.getElementById('authError').textContent = '';
+}
+
+function doAuth() {
+  const email = document.getElementById('authEmail').value.trim();
+  const pass  = document.getElementById('authPassword').value.trim();
+  const name  = document.getElementById('authName').value.trim();
+  const errEl = document.getElementById('authError');
+  errEl.textContent = '';
+
+  if (!email || !pass) { errEl.textContent = 'Completa todos los campos'; return; }
+
+  if (authMode === 'login') {
+    auth.signInWithEmailAndPassword(email, pass)
+      .then(() => showScreen('screenLobby'))
+      .catch(e => { errEl.textContent = tradFirebaseError(e.code); });
   } else {
-    document.getElementById("errorMsg").textContent = "Usuario o contraseña incorrectos";
+    if (!name) { errEl.textContent = 'Ingresa un nombre de usuario'; return; }
+    auth.createUserWithEmailAndPassword(email, pass)
+      .then(cred => {
+        return cred.user.updateProfile({ displayName: name }).then(() => {
+          showScreen('screenLobby');
+        });
+      })
+      .catch(e => { errEl.textContent = tradFirebaseError(e.code); });
   }
 }
 
-document.getElementById("password").addEventListener("keydown", e => {
-  if (e.key === "Enter") login();
+document.getElementById('authPassword').addEventListener('keydown', e => {
+  if (e.key === 'Enter') doAuth();
 });
 
-// ─── Animación de score ────────────────────────────────────────────────────
-function animarScore(id) {
-  const el = document.getElementById(id);
-  el.classList.add("animar");
-  setTimeout(() => el.classList.remove("animar"), 200);
-}
-
-function flashPanel() {
-  const p = document.getElementById("panel");
-  p.classList.remove("setflash");
-  void p.offsetWidth;
-  p.classList.add("setflash");
-  setTimeout(() => p.classList.remove("setflash"), 800);
-}
-
-// ─── Actualizar UI ─────────────────────────────────────────────────────────
-function actualizarMarcador() {
-  // Scores (con soporte tie-break)
-  if (enTiebreak) {
-    document.getElementById("scoreHome").textContent  = idxHome;
-    document.getElementById("scoreGuest").textContent = idxGuest;
-  } else {
-    document.getElementById("scoreHome").textContent  = PUNTOS_DISPLAY[idxHome];
-    document.getElementById("scoreGuest").textContent = PUNTOS_DISPLAY[idxGuest];
-  }
-
-  // Badges deuce/ventaja
-  const bH = document.getElementById("badgeHome");
-  const bG = document.getElementById("badgeGuest");
-  bH.className = "badge empty"; bH.textContent = "";
-  bG.className = "badge empty"; bG.textContent = "";
-
-  if (!enTiebreak) {
-    if (esDeuce()) {
-      bH.className = "badge deuce"; bH.textContent = "DEUCE";
-      bG.className = "badge deuce"; bG.textContent = "DEUCE";
-    } else if (hayVentaja()) {
-      const q = quienTieneVentaja();
-      if (q === "home")  { bH.className = "badge ventaja"; bH.textContent = "AD"; }
-      else               { bG.className = "badge ventaja"; bG.textContent = "AD"; }
-    }
-  }
-
-  // Nombres
-  document.getElementById("nombreHome").textContent  = nombreHome;
-  document.getElementById("nombreGuest").textContent = nombreGuest;
-
-  // Sets
-  for (let i = 0; i < 3; i++) {
-    const h = document.getElementById("setHome"+(i+1));
-    const g = document.getElementById("setGuest"+(i+1));
-    h.textContent = setsHome[i];
-    g.textContent = setsGuest[i];
-    h.classList.toggle("activo", i === setActual);
-    g.classList.toggle("activo", i === setActual);
-    // Tie-break: sets pueden tener valores altos → reducir fuente
-    const esTB = (setsHome[i] >= 7 || setsGuest[i] >= 7);
-    h.classList.toggle("tiebreak", esTB);
-    g.classList.toggle("tiebreak", esTB);
-  }
-
-  // Saque
-  document.getElementById("flechaDer").classList.toggle("activa",  saqueDerecha);
-  document.getElementById("flechaIzq").classList.toggle("activa", !saqueDerecha);
-
-  guardarEstado();
-}
-
-// ─── Lógica de puntos ──────────────────────────────────────────────────────
-function sumar(equipo) {
-  // Guardar snapshot ANTES de modificar
-  historial.push(snapshot());
-
-  if (enTiebreak) {
-    sumarTiebreak(equipo);
-  } else {
-    sumarNormal(equipo);
-  }
-
-  actualizarMarcador();
-}
-
-function sumarNormal(equipo) {
-  const rival = equipo === "home" ? "guest" : "home";
-
-  // Caso ventaja: el que tiene ventaja gana el juego; el otro vuelve a deuce
-  if (hayVentaja()) {
-    if (quienTieneVentaja() === equipo) {
-      // Gana el juego
-      ganarJuego(equipo);
-    } else {
-      // Vuelve a deuce (40-40)
-      idxHome  = 3;
-      idxGuest = 3;
-      saqueDerecha = !saqueDerecha;
-    }
-    return;
-  }
-
-  // Caso deuce: el siguiente punto da ventaja (índice 4)
-  if (esDeuce()) {
-    if (equipo === "home") idxHome  = 4;
-    else                   idxGuest = 4;
-    saqueDerecha = !saqueDerecha;
-    return;
-  }
-
-  // Caso normal
-  if (equipo === "home") {
-    if (idxHome < 3) { idxHome++; animarScore("scoreHome"); saqueDerecha = !saqueDerecha; }
-    else { ganarJuego("home"); }
-  } else {
-    if (idxGuest < 3) { idxGuest++; animarScore("scoreGuest"); saqueDerecha = !saqueDerecha; }
-    else { ganarJuego("guest"); }
-  }
-}
-
-function sumarTiebreak(equipo) {
-  if (equipo === "home") { idxHome++;  animarScore("scoreHome"); }
-  else                   { idxGuest++; animarScore("scoreGuest"); }
-  saqueDerecha = !saqueDerecha;
-
-  // En tie-break: ganar con ≥7 puntos y 2 de diferencia
-  if ((idxHome >= 7 || idxGuest >= 7) && Math.abs(idxHome - idxGuest) >= 2) {
-    const ganador = idxHome > idxGuest ? "home" : "guest";
-    ganarJuego(ganador);
-  }
-}
-
-function ganarJuego(equipo) {
-  idxHome = 0; idxGuest = 0;
-  saqueDerecha = true;
-  enTiebreak = false;
-  if (equipo === "home") setsHome[setActual]++;
-  else                   setsGuest[setActual]++;
-
-  animarScore(equipo === "home" ? "scoreHome" : "scoreGuest");
-  verificarSet();
-}
-
-function verificarSet() {
-  const h = setsHome[setActual];
-  const g = setsGuest[setActual];
-
-  // Tie-break a 6-6
-  if (h === 6 && g === 6) {
-    enTiebreak = true;
-    idxHome = 0; idxGuest = 0;
-    return;
-  }
-
-  // Ganó el set: ≥6 juegos con 2 de diferencia, o 7 (tras tie-break de set de ventaja)
-  const ganoSet =
-    (h >= 6 || g >= 6) && Math.abs(h - g) >= 2;
-
-  if (ganoSet) {
-    flashPanel();
-    if (setActual < 2) setActual++;
-  }
-}
-
-// ─── Restar (con historial) ────────────────────────────────────────────────
-function restar(equipo) {
-  historial.push(snapshot());
-  if (equipo === "home"  && idxHome  > 0) idxHome--;
-  if (equipo === "guest" && idxGuest > 0) idxGuest--;
-  actualizarMarcador();
-}
-
-// ─── Cambiar saque ─────────────────────────────────────────────────────────
-function cambiarSaque() {
-  saqueDerecha = !saqueDerecha;
-  actualizarMarcador();
-}
-
-// ─── Undo ──────────────────────────────────────────────────────────────────
-function snapshot() {
-  return {
-    idxHome, idxGuest,
-    setsHome: [...setsHome], setsGuest: [...setsGuest],
-    setActual, saqueDerecha, enTiebreak
+function tradFirebaseError(code) {
+  const map = {
+    'auth/user-not-found': 'Usuario no encontrado',
+    'auth/wrong-password': 'Contraseña incorrecta',
+    'auth/email-already-in-use': 'Correo ya registrado',
+    'auth/weak-password': 'Contraseña muy débil (mín. 6 chars)',
+    'auth/invalid-email': 'Correo inválido',
+    'auth/invalid-credential': 'Credenciales inválidas',
   };
+  return map[code] || 'Error: ' + code;
 }
 
-function deshacer() {
-  if (!historial.length) return;
-  const u = historial.pop();
-  idxHome      = u.idxHome;
-  idxGuest     = u.idxGuest;
-  setsHome     = [...u.setsHome];
-  setsGuest    = [...u.setsGuest];
-  setActual    = u.setActual;
-  saqueDerecha = u.saqueDerecha;
-  enTiebreak   = u.enTiebreak;
-  actualizarMarcador();
-}
+// ════════════════════════════════════════════════════
+//  OBSERVER DE AUTH
+// ════════════════════════════════════════════════════
+auth.onAuthStateChanged(user => {
+  currentUser = user;
+  renderLobbyAuth();
+  if (user) {
+    document.getElementById('newGamePanel').style.display = 'flex';
+    document.getElementById('savedGamesSection').style.display = 'block';
+    listenSavedGames();
+  } else {
+    document.getElementById('newGamePanel').style.display = 'none';
+    document.getElementById('savedGamesSection').style.display = 'none';
+    document.getElementById('savedGamesList').innerHTML = '';
+  }
+});
 
-// ─── Editar nombre ─────────────────────────────────────────────────────────
-function editarNombre(e) {
-  const actual = e === "home" ? nombreHome : nombreGuest;
-  const nuevo  = prompt("Nuevo nombre del equipo:", actual);
-  if (nuevo && nuevo.trim()) {
-    if (e === "home") nombreHome  = nuevo.trim();
-    else              nombreGuest = nuevo.trim();
-    actualizarMarcador();
+function renderLobbyAuth() {
+  const area = document.getElementById('lobbyAuthArea');
+  if (currentUser) {
+    area.innerHTML = `
+      <div class="user-bar">
+        <span class="user-email">👤 ${currentUser.displayName || currentUser.email}</span>
+        <button class="auth-row"><button class="btn-logout" onclick="doLogout()">Cerrar Sesión</button>
+      </div>`;
+    // fix html
+    area.innerHTML = `
+      <div class="user-bar">
+        <span class="user-email">👤 ${currentUser.displayName || currentUser.email}</span>
+        <button class="auth-row btn-logout" style="padding:8px 18px;border-radius:8px;border:1px solid rgba(255,59,59,0.3);background:rgba(255,59,59,0.15);color:#ff3b3b;font-family:'Oswald',sans-serif;letter-spacing:2px;font-size:0.9em;cursor:pointer;" onclick="doLogout()">Salir</button>
+      </div>`;
+  } else {
+    area.innerHTML = `
+      <div class="auth-row">
+        <button class="auth-row btn-login" style="padding:11px 28px;border-radius:10px;border:none;background:linear-gradient(135deg,#00c853,#00e676);color:white;font-family:'Oswald',sans-serif;letter-spacing:2px;font-size:1.05em;cursor:pointer;" onclick="showScreen('screenAuth');setAuthMode('login')">Iniciar Sesión</button>
+        <button class="auth-row btn-signup" style="padding:11px 28px;border-radius:10px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.07);color:white;font-family:'Oswald',sans-serif;letter-spacing:2px;font-size:1.05em;cursor:pointer;" onclick="showScreen('screenAuth');setAuthMode('signup')">Registrarse</button>
+      </div>`;
   }
 }
 
-// ─── Reset ─────────────────────────────────────────────────────────────────
-function resetear() {
-  if (!confirm("¿Resetear el marcador completamente?")) return;
-  idxHome = idxGuest = 0;
-  setsHome = [0,0,0]; setsGuest = [0,0,0];
-  setActual = 0; saqueDerecha = true;
-  historial = []; enTiebreak = false;
-  localStorage.removeItem("marcadorPadel");
+function doLogout() {
+  auth.signOut().then(() => {
+    currentUser = null;
+    renderLobbyAuth();
+  });
+}
+
+// ════════════════════════════════════════════════════
+//  SESIONES EN VIVO (visible para todos)
+// ════════════════════════════════════════════════════
+function listenLiveSessions() {
+  const ref = db.ref('sessions');
+  if (sessionsListener) ref.off('value', sessionsListener);
+  sessionsListener = ref.on('value', snap => {
+    const data  = snap.val() || {};
+    const grid  = document.getElementById('sessionsGrid');
+    const items = Object.entries(data).filter(([k,v]) => v.live === true);
+
+    if (!items.length) {
+      grid.innerHTML = '<div class="no-sessions">No hay partidos en vivo ahora mismo.</div>';
+      return;
+    }
+
+    grid.innerHTML = items.map(([key, v]) => {
+      const h = v.idxHome  || 0;
+      const g = v.idxGuest || 0;
+      const pd = ["0","15","30","40","AD","W"];
+      const scoreText = v.enTiebreak ? `${h} - ${g}` : `${pd[h]} - ${pd[g]}`;
+      const setsH = (v.setsHome  || [0,0,0]).slice(0, (v.setActual||0)+1).join(' ');
+      const setsG = (v.setsGuest || [0,0,0]).slice(0, (v.setActual||0)+1).join(' ');
+      return `
+        <div class="session-card" onclick="watchSession('${key}')">
+          <div class="session-label"><span class="session-live-dot"></span>EN VIVO</div>
+          <div class="session-title">${escHtml(v.title || 'Partido')}</div>
+          <div class="session-score-preview">
+            ${escHtml(v.nombreHome||'HOME')} ${scoreText} ${escHtml(v.nombreGuest||'GUEST')}
+          </div>
+          <div class="session-score-preview" style="font-size:0.8em;">
+            Sets: ${setsH} | ${setsG}
+          </div>
+        </div>`;
+    }).join('');
+  });
+}
+
+// ════════════════════════════════════════════════════
+//  PARTIDOS GUARDADOS (solo el usuario)
+// ════════════════════════════════════════════════════
+function listenSavedGames() {
+  if (!currentUser) return;
+  const ref = db.ref('sessions').orderByChild('uid').equalTo(currentUser.uid);
+  ref.on('value', snap => {
+    const data = snap.val() || {};
+    const list = document.getElementById('savedGamesList');
+    const games = Object.entries(data).sort((a,b) => (b[1].createdAt||0)-(a[1].createdAt||0));
+
+    if (!games.length) {
+      list.innerHTML = '<div class="no-sessions">Aún no tienes partidos guardados.</div>';
+      return;
+    }
+
+    list.innerHTML = games.map(([key, v]) => {
+      const date = v.createdAt ? new Date(v.createdAt).toLocaleDateString('es') : '';
+      const liveTag = v.live ? '<span style="color:#00e676;font-size:0.8em;">● en vivo</span>' : '';
+      return `
+        <div class="saved-game-row">
+          <div class="saved-game-title" onclick="resumeGame('${key}')">${escHtml(v.title||'Sin título')}</div>
+          <div class="saved-game-meta">${date} ${liveTag}</div>
+          <button class="btn-delete-game" onclick="deleteGame('${key}',event)" title="Eliminar">🗑</button>
+        </div>`;
+    }).join('');
+  });
+}
+
+function deleteGame(key, e) {
+  e.stopPropagation();
+  if (!confirm('¿Eliminar este partido?')) return;
+  db.ref('sessions/'+key).remove();
+}
+
+function resumeGame(key) {
+  if (!currentUser) return;
+  db.ref('sessions/'+key).once('value', snap => {
+    const v = snap.val();
+    if (!v) return;
+    if (v.uid !== currentUser.uid) { alert('No eres el propietario.'); return; }
+    currentGameId = key;
+    isOwner = true;
+    loadStateFrom(v);
+    enterMarcador(true);
+    listenGame(key);
+  });
+}
+
+// ════════════════════════════════════════════════════
+//  NUEVO PARTIDO
+// ════════════════════════════════════════════════════
+function startNewGame() {
+  if (!currentUser) { showScreen('screenAuth'); return; }
+  const title = document.getElementById('gameTitle').value.trim() || 'Partido';
+  const nh    = document.getElementById('gameTeamHome').value.trim()  || 'HOME';
+  const ng    = document.getElementById('gameTeamGuest').value.trim() || 'GUEST';
+
+  resetState();
+  nombreHome  = nh;
+  nombreGuest = ng;
+  gameTitle   = title;
+
+  const state = buildState();
+  state.uid       = currentUser.uid;
+  state.owner     = currentUser.displayName || currentUser.email;
+  state.title     = title;
+  state.live      = true;
+  state.createdAt = Date.now();
+
+  const ref = db.ref('sessions').push(state);
+  currentGameId = ref.key;
+  isOwner       = true;
+
+  // clear inputs
+  document.getElementById('gameTitle').value = '';
+  document.getElementById('gameTeamHome').value  = '';
+  document.getElementById('gameTeamGuest').value = '';
+
+  enterMarcador(true);
+  listenGame(currentGameId);
+}
+
+// ════════════════════════════════════════════════════
+//  VER SESIÓN (espectador)
+// ════════════════════════════════════════════════════
+function watchSession(key) {
+  currentGameId = key;
+  isOwner = false;
+  enterMarcador(false);
+  listenGame(key);
+}
+
+// ════════════════════════════════════════════════════
+//  ESCUCHAR PARTIDO EN TIEMPO REAL
+// ════════════════════════════════════════════════════
+function listenGame(key) {
+  if (sessionListener) {
+    db.ref('sessions/'+sessionListener).off('value');
+    sessionListener = null;
+  }
+  sessionListener = key;
+  db.ref('sessions/'+key).on('value', snap => {
+    const v = snap.val();
+    if (!v) return;
+    loadStateFrom(v);
+    actualizarMarcador();
+  });
+}
+
+function loadStateFrom(v) {
+  idxHome      = v.idxHome      ?? 0;
+  idxGuest     = v.idxGuest     ?? 0;
+  setsHome     = v.setsHome     ?? [0,0,0];
+  setsGuest    = v.setsGuest    ?? [0,0,0];
+  setActual    = v.setActual    ?? 0;
+  saqueDerecha = v.saqueDerecha ?? true;
+  nombreHome   = v.nombreHome   ?? 'HOME';
+  nombreGuest  = v.nombreGuest  ?? 'GUEST';
+  enTiebreak   = v.enTiebreak   ?? false;
+  gameTitle    = v.title        ?? '';
+  historial    = v.historial    ?? [];
+}
+
+// ════════════════════════════════════════════════════
+//  ENTRAR AL MARCADOR
+// ════════════════════════════════════════════════════
+function enterMarcador(owner) {
+  showScreen('screenMarcador');
+
+  // edit/view mode
+  document.getElementById('ownerBotones').style.display  = owner ? 'flex' : 'none';
+  document.getElementById('viewerBotones').style.display = owner ? 'none' : 'flex';
+  document.getElementById('viewerBadge').style.display   = owner ? 'none' : 'block';
+
+  ['nombreHome','nombreGuest'].forEach(id => {
+    const el = document.getElementById(id);
+    el.classList.toggle('readonly', !owner);
+  });
+
+  document.getElementById('sponsorAddBtn').style.display = owner ? 'flex' : 'none';
+
   actualizarMarcador();
-  // Reinicia el cronómetro
   clearInterval(timerInterval);
   iniciarCronometro();
 }
 
-// ─── Persistencia ──────────────────────────────────────────────────────────
-function guardarEstado() {
-  const estado = {
-    idxHome, idxGuest,
-    setsHome, setsGuest,
-    setActual, saqueDerecha,
-    nombreHome, nombreGuest,
-    enTiebreak
-  };
-  try { localStorage.setItem("marcadorPadel", JSON.stringify(estado)); } catch(e) {}
-}
-
-function cargarEstado() {
-  try {
-    const data = localStorage.getItem("marcadorPadel");
-    if (!data) return;
-    const s = JSON.parse(data);
-    // Asignamos explícitamente para no contaminar window
-    idxHome      = s.idxHome      ?? 0;
-    idxGuest     = s.idxGuest     ?? 0;
-    setsHome     = s.setsHome     ?? [0,0,0];
-    setsGuest    = s.setsGuest    ?? [0,0,0];
-    setActual    = s.setActual    ?? 0;
-    saqueDerecha = s.saqueDerecha ?? true;
-    nombreHome   = s.nombreHome   ?? "HOME";
-    nombreGuest  = s.nombreGuest  ?? "GUEST";
-    enTiebreak   = s.enTiebreak   ?? false;
-  } catch(e) {}
-}
-
-// ─── Cronómetro ────────────────────────────────────────────────────────────
-function iniciarCronometro() {
-  inicio = new Date();
-  const cron = document.getElementById("cronometro");
+function irLobby() {
+  // set live=false when owner leaves
+  if (isOwner && currentGameId) {
+    db.ref('sessions/'+currentGameId+'/live').set(false);
+  }
+  if (sessionListener) {
+    db.ref('sessions/'+sessionListener).off('value');
+    sessionListener = null;
+  }
   clearInterval(timerInterval);
-  timerInterval = setInterval(() => {
-    const diff = Math.floor((new Date() - inicio) / 1000);
-    const h = String(Math.floor(diff / 3600)).padStart(2, "0");
-    const m = String(Math.floor((diff % 3600) / 60)).padStart(2, "0");
-    const s = String(diff % 60).padStart(2, "0");
-    cron.textContent = `${h}:${m}:${s}`;
-  }, 1000);
+  currentGameId = null;
+  isOwner = false;
+  showScreen('screenLobby');
 }
 
-// ─── WhatsApp ──────────────────────────────────────────────────────────────
-function enviarWhatsApp() {
-  const ahora = new Date().toLocaleString("es-ES");
-  const cron  = document.getElementById("cronometro").textContent;
+// ════════════════════════════════════════════════════
+//  HELPERS DE DEUCE / VENTAJA
+// ════════════════════════════════════════════════════
+function esDeuce()    { return idxHome === 3 && idxGuest === 3; }
+function hayVentaja() { return (idxHome===4&&idxGuest===3)||(idxHome===3&&idxGuest===4); }
+function quienTieneVentaja() {
+  if (idxHome===4&&idxGuest===3) return 'home';
+  if (idxHome===3&&idxGuest===4) return 'guest';
+  return null;
+}
 
-  // Calcular sets ganados
-  let setsGanadosHome = 0, setsGanadosGuest = 0;
-  for (let i = 0; i <= setActual; i++) {
-    if (setsHome[i] > setsGuest[i]) setsGanadosHome++;
-    else if (setsGuest[i] > setsHome[i]) setsGanadosGuest++;
+// ════════════════════════════════════════════════════
+//  LÓGICA DE PUNTOS
+// ════════════════════════════════════════════════════
+function sumar(equipo) {
+  historial.push(snapshot());
+  if (enTiebreak) sumarTiebreak(equipo);
+  else            sumarNormal(equipo);
+  actualizarMarcador();
+  guardarEstado();
+}
+
+function sumarNormal(equipo) {
+  if (hayVentaja()) {
+    if (quienTieneVentaja()===equipo) { ganarJuego(equipo); }
+    else { idxHome=3; idxGuest=3; saqueDerecha=!saqueDerecha; }
+    return;
+  }
+  if (esDeuce()) {
+    if (equipo==='home') idxHome=4; else idxGuest=4;
+    saqueDerecha=!saqueDerecha; return;
+  }
+  if (equipo==='home') {
+    if (idxHome<3) { idxHome++; animarScore('scoreHome'); saqueDerecha=!saqueDerecha; }
+    else ganarJuego('home');
+  } else {
+    if (idxGuest<3) { idxGuest++; animarScore('scoreGuest'); saqueDerecha=!saqueDerecha; }
+    else ganarJuego('guest');
+  }
+}
+
+function sumarTiebreak(equipo) {
+  if (equipo==='home') { idxHome++;  animarScore('scoreHome'); }
+  else                 { idxGuest++; animarScore('scoreGuest'); }
+  saqueDerecha=!saqueDerecha;
+  if ((idxHome>=7||idxGuest>=7)&&Math.abs(idxHome-idxGuest)>=2) {
+    ganarJuego(idxHome>idxGuest?'home':'guest');
+  }
+}
+
+function ganarJuego(equipo) {
+  idxHome=0; idxGuest=0; saqueDerecha=true; enTiebreak=false;
+  if (equipo==='home') setsHome[setActual]++;
+  else                 setsGuest[setActual]++;
+  animarScore(equipo==='home'?'scoreHome':'scoreGuest');
+  verificarSet();
+}
+
+function verificarSet() {
+  const h=setsHome[setActual], g=setsGuest[setActual];
+  if (h===6&&g===6) { enTiebreak=true; idxHome=0; idxGuest=0; return; }
+  if ((h>=6||g>=6)&&Math.abs(h-g)>=2) {
+    flashPanel();
+    if (setActual<2) setActual++;
+  }
+}
+
+function restar(equipo) {
+  historial.push(snapshot());
+  if (equipo==='home'  && idxHome  > 0) idxHome--;
+  if (equipo==='guest' && idxGuest > 0) idxGuest--;
+  actualizarMarcador();
+  guardarEstado();
+}
+
+function cambiarSaque() {
+  saqueDerecha=!saqueDerecha;
+  actualizarMarcador();
+  guardarEstado();
+}
+
+function snapshot() {
+  return { idxHome, idxGuest, setsHome:[...setsHome], setsGuest:[...setsGuest],
+           setActual, saqueDerecha, enTiebreak };
+}
+
+function deshacer() {
+  if (!historial.length) return;
+  const u=historial.pop();
+  idxHome=u.idxHome; idxGuest=u.idxGuest;
+  setsHome=[...u.setsHome]; setsGuest=[...u.setsGuest];
+  setActual=u.setActual; saqueDerecha=u.saqueDerecha; enTiebreak=u.enTiebreak;
+  actualizarMarcador();
+  guardarEstado();
+}
+
+function editarNombre(e) {
+  if (!isOwner) return;
+  const actual = e==='home' ? nombreHome : nombreGuest;
+  const nuevo  = prompt('Nuevo nombre del equipo:', actual);
+  if (nuevo && nuevo.trim()) {
+    if (e==='home') nombreHome=nuevo.trim(); else nombreGuest=nuevo.trim();
+    actualizarMarcador();
+    guardarEstado();
+  }
+}
+
+function resetear() {
+  if (!isOwner) return;
+  if (!confirm('¿Resetear el marcador completamente?')) return;
+  resetState();
+  historial=[];
+  actualizarMarcador();
+  guardarEstado();
+  clearInterval(timerInterval);
+  iniciarCronometro();
+}
+
+function resetState() {
+  idxHome=0; idxGuest=0;
+  setsHome=[0,0,0]; setsGuest=[0,0,0];
+  setActual=0; saqueDerecha=true; enTiebreak=false; historial=[];
+  nombreHome='HOME'; nombreGuest='GUEST';
+}
+
+// ════════════════════════════════════════════════════
+//  GUARDAR EN FIREBASE
+// ════════════════════════════════════════════════════
+function buildState() {
+  return {
+    idxHome, idxGuest,
+    setsHome:[...setsHome], setsGuest:[...setsGuest],
+    setActual, saqueDerecha, enTiebreak,
+    nombreHome, nombreGuest,
+    historial: historial.slice(-20), // keep last 20 snapshots
+    updatedAt: Date.now()
+  };
+}
+
+function guardarEstado() {
+  if (!isOwner || !currentGameId) return;
+  const state = buildState();
+  state.live  = true;
+  state.title = gameTitle;
+  db.ref('sessions/'+currentGameId).update(state);
+}
+
+// ════════════════════════════════════════════════════
+//  ACTUALIZAR UI
+// ════════════════════════════════════════════════════
+function actualizarMarcador() {
+  if (enTiebreak) {
+    document.getElementById('scoreHome').textContent  = idxHome;
+    document.getElementById('scoreGuest').textContent = idxGuest;
+  } else {
+    document.getElementById('scoreHome').textContent  = PUNTOS_DISPLAY[idxHome];
+    document.getElementById('scoreGuest').textContent = PUNTOS_DISPLAY[idxGuest];
   }
 
-  let texto = `🎾 *Partido de Pádel* 🎾\n`;
-  texto += `📅 ${ahora}\n\n`;
-  texto += `🏆 *Resultado:*\n`;
-  texto += `🔴 *${nombreHome}*: ${setsGanadosHome} sets\n`;
-  texto += `🟢 *${nombreGuest}*: ${setsGanadosGuest} sets\n\n`;
-  texto += `📊 *Detalle de sets:*\n`;
-  for (let i = 0; i <= setActual; i++) {
-    if (setsHome[i] > 0 || setsGuest[i] > 0) {
-      texto += `  Set ${i+1}: ${setsHome[i]} - ${setsGuest[i]}\n`;
+  const bH=document.getElementById('badgeHome'), bG=document.getElementById('badgeGuest');
+  bH.className='badge empty'; bH.textContent='';
+  bG.className='badge empty'; bG.textContent='';
+
+  if (!enTiebreak) {
+    if (esDeuce()) {
+      bH.className='badge deuce'; bH.textContent='DEUCE';
+      bG.className='badge deuce'; bG.textContent='DEUCE';
+    } else if (hayVentaja()) {
+      const q=quienTieneVentaja();
+      if (q==='home') { bH.className='badge ventaja'; bH.textContent='AD'; }
+      else            { bG.className='badge ventaja'; bG.textContent='AD'; }
     }
   }
-  texto += `\n⏱️ Duración: ${cron}\n`;
-  texto += `\n_Enviado desde el Marcador de César_ 🎾`;
 
-  const numero = prompt("Número de WhatsApp (sin + ni espacios, ej: 50760000000):");
-  if (!numero || !numero.trim()) return;
-  const url = `https://wa.me/${numero.trim()}?text=${encodeURIComponent(texto)}`;
-  window.open(url, "_blank");
+  document.getElementById('nombreHome').textContent  = nombreHome;
+  document.getElementById('nombreGuest').textContent = nombreGuest;
+  document.getElementById('gameTitleBar').textContent = gameTitle;
+
+  for (let i=0;i<3;i++) {
+    const h=document.getElementById('setHome'+(i+1));
+    const g=document.getElementById('setGuest'+(i+1));
+    h.textContent=setsHome[i]; g.textContent=setsGuest[i];
+    h.classList.toggle('activo',i===setActual);
+    g.classList.toggle('activo',i===setActual);
+    const esTB=(setsHome[i]>=7||setsGuest[i]>=7);
+    h.classList.toggle('tiebreak',esTB); g.classList.toggle('tiebreak',esTB);
+  }
+
+  document.getElementById('flechaDer').classList.toggle('activa',  saqueDerecha);
+  document.getElementById('flechaIzq').classList.toggle('activa', !saqueDerecha);
 }
 
-// ─── Pantalla completa ─────────────────────────────────────────────────────
+function animarScore(id) {
+  const el=document.getElementById(id);
+  el.classList.add('animar');
+  setTimeout(()=>el.classList.remove('animar'),200);
+}
+
+function flashPanel() {
+  const p=document.getElementById('panel');
+  p.classList.remove('setflash'); void p.offsetWidth;
+  p.classList.add('setflash');
+  setTimeout(()=>p.classList.remove('setflash'),800);
+}
+
+// ════════════════════════════════════════════════════
+//  CRONÓMETRO
+// ════════════════════════════════════════════════════
+function iniciarCronometro() {
+  inicio=new Date();
+  const cron=document.getElementById('cronometro');
+  clearInterval(timerInterval);
+  timerInterval=setInterval(()=>{
+    const diff=Math.floor((new Date()-inicio)/1000);
+    const h=String(Math.floor(diff/3600)).padStart(2,'0');
+    const m=String(Math.floor((diff%3600)/60)).padStart(2,'0');
+    const s=String(diff%60).padStart(2,'0');
+    cron.textContent=`${h}:${m}:${s}`;
+  },1000);
+}
+
+// ════════════════════════════════════════════════════
+//  WHATSAPP
+// ════════════════════════════════════════════════════
+function enviarWhatsApp() {
+  const cron=document.getElementById('cronometro').textContent;
+  let sH=0, sG=0;
+  for (let i=0;i<=setActual;i++) {
+    if (setsHome[i]>setsGuest[i]) sH++;
+    else if (setsGuest[i]>setsHome[i]) sG++;
+  }
+  let txt=`🎾 *Partido de Pádel*\n📌 ${gameTitle}\n\n`;
+  txt+=`🏆 *${nombreHome}*: ${sH} sets\n🏆 *${nombreGuest}*: ${sG} sets\n\n`;
+  txt+=`📊 *Sets:*\n`;
+  for (let i=0;i<=setActual;i++) {
+    if (setsHome[i]>0||setsGuest[i]>0) txt+=`  Set ${i+1}: ${setsHome[i]} - ${setsGuest[i]}\n`;
+  }
+  txt+=`\n⏱️ ${cron}\n_Marcador en vivo 🎾_`;
+  const num=prompt('Número WhatsApp (sin + ni espacios):');
+  if (!num||!num.trim()) return;
+  window.open(`https://wa.me/${num.trim()}?text=${encodeURIComponent(txt)}`, '_blank');
+}
+
 function toggleFullScreen() {
   if (!document.fullscreenElement) document.documentElement.requestFullscreen();
   else document.exitFullscreen();
 }
+
+// ════════════════════════════════════════════════════
+//  PATROCINADORES
+// ════════════════════════════════════════════════════
+let sponsors = [];
+
+function loadSponsors() {
+  db.ref('sponsors').on('value', snap => {
+    sponsors = [];
+    const data = snap.val() || {};
+    Object.entries(data).forEach(([k,v]) => sponsors.push({key:k, ...v}));
+    // Always have defaults if none exist
+    if (!sponsors.length) {
+      sponsors = [
+        {key:'default1', name:'Tu Marca Aquí', color:'#ffd700'},
+        {key:'default2', name:'Patrocinador',  color:'#00e5ff'},
+        {key:'default3', name:'Club Pádel',    color:'#ff3b3b'},
+      ];
+    }
+    renderSponsorBar();
+  });
+}
+
+function renderSponsorBar() {
+  const track = document.getElementById('sponsorTrack');
+  // Duplicate for seamless loop
+  const items = [...sponsors, ...sponsors];
+  track.innerHTML = items.map(s =>
+    `<div class="sponsor-item">
+       <span class="sponsor-logo" style="color:${escHtml(s.color||'white')}">${escHtml(s.name)}</span>
+     </div>`
+  ).join('');
+}
+
+function openSponsorModal() {
+  document.getElementById('sponsorModal').classList.add('open');
+  renderSponsorList();
+}
+function closeSponsorModal() {
+  document.getElementById('sponsorModal').classList.remove('open');
+}
+
+function renderSponsorList() {
+  const list = document.getElementById('sponsorList');
+  list.innerHTML = sponsors.filter(s=>!s.key.startsWith('default')).map(s =>
+    `<div class="sponsor-list-item">
+       <span style="color:${escHtml(s.color||'white')}">${escHtml(s.name)}</span>
+       <button class="btn-remove-sponsor" onclick="removeSponsor('${s.key}')">✕</button>
+     </div>`
+  ).join('') || '<div style="color:rgba(255,255,255,0.3);font-size:0.85em;">Sin patrocinadores aún.</div>';
+}
+
+function addSponsor() {
+  const name  = document.getElementById('sponsorName').value.trim();
+  const color = document.getElementById('sponsorColor').value.trim() || '#ffffff';
+  if (!name) return;
+  db.ref('sponsors').push({ name, color }).then(() => {
+    document.getElementById('sponsorName').value  = '';
+    document.getElementById('sponsorColor').value = '';
+    renderSponsorList();
+  });
+}
+
+function removeSponsor(key) {
+  db.ref('sponsors/'+key).remove();
+}
+
+// ════════════════════════════════════════════════════
+//  UTILS
+// ════════════════════════════════════════════════════
+function escHtml(str) {
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ════════════════════════════════════════════════════
+//  INIT
+// ════════════════════════════════════════════════════
+listenLiveSessions();
+loadSponsors();
 </script>
 </body>
 </html>
