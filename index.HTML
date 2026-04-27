@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -703,14 +704,14 @@ body, html {
 //  ⚠️  REEMPLAZA ESTOS VALORES CON TU PROYECTO FIREBASE
 // ════════════════════════════════════════════════════
 const firebaseConfig = {
-  apiKey: "AIzaSyDpSnx0D9b7KX4g0bhy4X8zExhrWPJwZbw",
-  authDomain: "contador-de-padel.firebaseapp.com",
-  databaseURL: "https://contador-de-padel-default-rtdb.firebaseio.com",
-  projectId: "contador-de-padel",
-  storageBucket: "contador-de-padel.firebasestorage.app",
+  apiKey:            "AIzaSyDpSnx0D9b7KX4g0bhy4X8zExhrWPJwZbw",
+  authDomain:        "contador-de-padel.firebaseapp.com",
+  databaseURL:       "https://contador-de-padel-default-rtdb.firebaseio.com",
+  projectId:         "contador-de-padel",
+  storageBucket:     "contador-de-padel.firebasestorage.app",
   messagingSenderId: "316675340153",
-  appId: "1:316675340153:web:b658ec42d5a7a2d4fb21a8",
-  measurementId: "G-49KZNXWMTY"
+  appId:             "1:316675340153:web:b658ec42d5a7a2d4fb21a8",
+  measurementId:     "G-49KZNXWMTY"
 };
 
 firebase.initializeApp(firebaseConfig);
@@ -1108,8 +1109,94 @@ function verificarSet() {
   if (h===6&&g===6) { enTiebreak=true; idxHome=0; idxGuest=0; return; }
   if ((h>=6||g>=6)&&Math.abs(h-g)>=2) {
     flashPanel();
+    // Contar sets ganados hasta ahora
+    let sH=0, sG=0;
+    for (let i=0;i<=setActual;i++) {
+      if (setsHome[i]>setsGuest[i]) sH++;
+      else if (setsGuest[i]>setsHome[i]) sG++;
+    }
+    // Ganó el partido (mejor de 3 sets = 2 sets)
+    if (sH===2 || sG===2) {
+      const ganador = sH===2 ? nombreHome : nombreGuest;
+      terminarPartido(ganador);
+      return;
+    }
+    // Avanzar al siguiente set
     if (setActual<2) setActual++;
   }
+}
+
+function terminarPartido(ganador) {
+  let detalle = [];
+  for (let i=0;i<=setActual;i++) {
+    if (setsHome[i]>0||setsGuest[i]>0) detalle.push(setsHome[i]+'-'+setsGuest[i]);
+  }
+  if (isOwner && currentGameId) {
+    db.ref('sessions/'+currentGameId).update({
+      live: false,
+      finished: true,
+      winner: ganador,
+      finishedAt: Date.now()
+    });
+  }
+  clearInterval(timerInterval);
+  mostrarPantallaGanador(ganador, detalle.join('  |  '));
+}
+
+function mostrarPantallaGanador(ganador, detalle) {
+  const overlay = document.createElement('div');
+  overlay.id = 'winnerOverlay';
+  overlay.style.cssText = 'position:fixed;inset:0;z-index:2000;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(0,0,0,0.92);backdrop-filter:blur(12px);gap:24px;padding:40px 20px;text-align:center;';
+  const isHome = ganador === nombreHome;
+  const color  = isHome ? '#ff3b3b' : '#00e676';
+  const waBtn = isOwner
+    ? '<button onclick="compartirResultado()" style="font-family:Oswald,sans-serif;padding:13px 30px;font-size:1.1em;letter-spacing:3px;border:none;border-radius:12px;background:#25D366;color:white;cursor:pointer;text-transform:uppercase;">\u{1F4F2} WhatsApp</button>'
+    : '';
+  overlay.innerHTML =
+    '<div id="wTrophy" style="font-size:4em;display:inline-block">\u{1F3C6}</div>' +
+    '<div style="font-family:Oswald,sans-serif;font-size:1em;letter-spacing:6px;color:rgba(255,255,255,0.4);text-transform:uppercase;">\u{a1}Campe\u{f3}n!</div>' +
+    '<div style="font-family:Oswald,sans-serif;font-size:3.2em;font-weight:700;color:' + color + ';letter-spacing:4px;text-shadow:0 0 30px ' + color + ',0 0 60px ' + color + ';text-transform:uppercase;">' + escHtml(ganador) + '</div>' +
+    '<div style="font-family:Oswald,sans-serif;font-size:1.1em;letter-spacing:3px;color:rgba(255,255,255,0.5);">' + escHtml(gameTitle) + '</div>' +
+    '<div style="font-family:Oswald,sans-serif;font-size:1.8em;letter-spacing:4px;color:#ffd700;">' + escHtml(detalle) + '</div>' +
+    '<div style="display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-top:12px;">' +
+      '<button onclick="document.getElementById('winnerOverlay').remove();irLobby()" style="font-family:Oswald,sans-serif;padding:13px 30px;font-size:1.1em;letter-spacing:3px;border:1px solid rgba(255,255,255,0.2);border-radius:12px;background:rgba(255,255,255,0.1);color:white;cursor:pointer;text-transform:uppercase;">\u{1F3E0} Volver al Lobby</button>' +
+      waBtn +
+    '</div>';
+  document.body.appendChild(overlay);
+  const style = document.createElement('style');
+  style.textContent = '@keyframes trofeo{0%{transform:scale(0) rotate(-20deg);opacity:0}60%{transform:scale(1.3)}100%{transform:scale(1);opacity:1}} @keyframes confettiDrop{to{transform:translateY(110vh) rotate(720deg);opacity:0}}';
+  document.head.appendChild(style);
+  document.getElementById('wTrophy').style.animation = 'trofeo 0.6s ease';
+  for (let i=0;i<40;i++) {
+    const c = document.createElement('div');
+    const cols = ['#ff3b3b','#00e676','#ffd700','#00e5ff','#ff8f00'];
+    const sz = (6+Math.random()*8)+'px';
+    c.style.cssText = 'position:fixed;top:-20px;left:'+Math.random()*100+'vw;width:'+sz+';height:'+sz+';background:'+cols[Math.floor(Math.random()*cols.length)]+';border-radius:'+(Math.random()>0.5?'50%':'2px')+';animation:confettiDrop '+(1.5+Math.random()*2)+'s '+(Math.random()*1.5)+'s ease-in forwards;z-index:2001;pointer-events:none;';
+    document.body.appendChild(c);
+    setTimeout(function(){c.remove()}, 4000);
+  }
+}
+
+function compartirResultado() {
+  const cron = document.getElementById('cronometro').textContent;
+  let sH=0, sG=0;
+  for (let i=0;i<=setActual;i++) {
+    if (setsHome[i]>setsGuest[i]) sH++;
+    else if (setsGuest[i]>setsHome[i]) sG++;
+  }
+  let detalle = [];
+  for (let i=0;i<=setActual;i++) {
+    if (setsHome[i]>0||setsGuest[i]>0) detalle.push(setsHome[i]+'-'+setsGuest[i]);
+  }
+  const ganador = sH>=sG ? nombreHome : nombreGuest;
+  let txt = '\u{1F3C6} *\u{a1}Partido finalizado!*\n\u{1F4CC} ' + gameTitle + '\n\n';
+  txt += '\u{1F947} *Ganador: ' + ganador + '*\n\n';
+  txt += '\u{1F4CA} Sets: ' + detalle.join(' | ') + '\n';
+  txt += '\u{23F1}\u{fe0f} Duraci\u{f3}n: ' + cron + '\n';
+  txt += '\n_Marcador en vivo \u{1F3BE}_';
+  const num = prompt('N\u{fa}mero WhatsApp (sin + ni espacios):');
+  if (!num||!num.trim()) return;
+  window.open('https://wa.me/'+num.trim()+'?text='+encodeURIComponent(txt),'_blank');
 }
 
 function restar(equipo) {
