@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -213,21 +211,31 @@ body, html {
    PANTALLA: AUTH MODAL
 ══════════════════════════════════════════ */
 #screenAuth {
-  align-items: center; justify-content: center;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 40px 20px 60px;
+  gap: 36px;
+  overflow-y: auto;
 }
 #authBox {
   background: rgba(10,10,30,0.95);
-  padding: 48px 56px;
+  padding: 24px 32px;
   border-radius: 20px;
   border: 1px solid rgba(255,255,255,0.08);
   box-shadow: 0 0 60px rgba(0,0,0,0.9);
-  display: flex; flex-direction: column; gap: 16px;
-  width: 340px;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px 18px;
+  width: 100%;
+  max-width: 900px;
 }
 #authBox h2 {
   font-family: 'Oswald', sans-serif;
-  text-align: center; font-size: 1.7em; letter-spacing: 4px;
+  text-align: center; font-size: 1.5em; letter-spacing: 4px;
   text-transform: uppercase;
+  width: 100%;
 }
 #authBox h2 span { color: var(--home); }
 #authBox input {
@@ -236,6 +244,7 @@ body, html {
   border-radius: 8px; border: 1px solid rgba(255,255,255,0.15);
   background: rgba(255,255,255,0.06); color: white;
   outline: none; transition: border-color 0.2s;
+  flex: 1; min-width: 150px;
 }
 #authBox input:focus { border-color: var(--cyan); }
 .auth-tabs {
@@ -244,24 +253,25 @@ body, html {
   border: 1px solid rgba(255,255,255,0.1);
 }
 .auth-tab {
-  flex: 1; padding: 10px;
-  font-family: 'Oswald', sans-serif; font-size: 1em;
+  flex: 1; padding: 6px 14px;
+  font-family: 'Oswald', sans-serif; font-size: 0.78em;
   letter-spacing: 2px; text-transform: uppercase;
   border: none; cursor: pointer; transition: all 0.2s;
-  background: rgba(255,255,255,0.04); color: rgba(255,255,255,0.5);
+  background: rgba(255,255,255,0.04); color: rgba(255,255,255,0.45);
 }
 .auth-tab.active { background: var(--cyan); color: #000; font-weight: 700; }
 #authBtn {
-  padding: 13px; font-size: 1.15em;
+  padding: 13px 28px; font-size: 1.05em;
   font-family: 'Oswald', sans-serif; letter-spacing: 3px;
   border: none; border-radius: 10px;
   background: linear-gradient(135deg,#00c853,#00e676);
   color: white; font-weight: 700; cursor: pointer;
   transition: all 0.25s; text-transform: uppercase;
   box-shadow: 0 0 20px rgba(0,230,118,0.4);
+  flex-shrink: 0; align-self: stretch;
 }
 #authBtn:hover { transform: translateY(-2px); }
-#authError { color: var(--home); text-align: center; font-weight: 600; font-size: 0.95em; min-height: 1.2em; }
+#authError { color: var(--home); text-align: center; font-weight: 600; font-size: 0.95em; min-height: 1.2em; width: 100%; }
 .btn-back-lobby {
   background: none; border: none; color: rgba(255,255,255,0.4);
   cursor: pointer; font-family: 'Rajdhani', sans-serif;
@@ -554,25 +564,52 @@ body, html {
   .divisor { font-size: 1.5em; }
   #authBox { width: 90%; padding: 36px 24px; }
 }
+
+#authLiveSection {
+  width: 100%; max-width: 900px;
+}
+#authLiveSection h3 {
+  font-family: 'Oswald', sans-serif;
+  font-size: 1.2em; letter-spacing: 3px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.7);
+  margin-bottom: 16px;
+}
+@media (max-width: 640px) {
+  #authBox { padding: 20px 16px !important; flex-direction: column !important; }
+  #authBox input { min-width: 100% !important; flex: unset !important; width: 100% !important; }
+  #authBtn { width: 100% !important; flex-shrink: unset !important; }
+  .auth-tabs { width: 100% !important; }
+}
 </style>
 </head>
 <body>
 
 <!-- ══ SCREEN: AUTH ═══════════════════════════════ -->
 <div id="screenAuth" class="screen active">
+
+  <!-- Login box (horizontal) -->
   <div id="authBox">
     <h2>🎾 Marcador <span>Pádel</span></h2>
-    <div class="auth-tabs">
-      <button class="auth-tab active" id="tabLogin"  id="tabLogin">Iniciar Sesión</button>
-      <button class="auth-tab"        id="tabSignup" id="tabSignup">Registrarse</button>
-    </div>
     <input type="email"    id="authEmail"    placeholder="Correo electrónico" autocomplete="email" />
     <input type="password" id="authPassword" placeholder="Contraseña"         autocomplete="current-password" />
     <input type="text"     id="authName"     placeholder="Nombre de usuario"  style="display:none" />
-    <button id="authBtn" >Entrar</button>
+    <div class="auth-tabs">
+      <button class="auth-tab active" id="tabLogin">Iniciar Sesión</button>
+      <button class="auth-tab"        id="tabSignup">Registrarse</button>
+    </div>
+    <button id="authBtn">Entrar</button>
     <div id="authError"></div>
-    
   </div>
+
+  <!-- Partidos en vivo debajo del login -->
+  <div id="authLiveSection">
+    <h3>🔴 Partidos en Vivo</h3>
+    <div id="authSessionsGrid" class="sessions-grid">
+      <div class="no-sessions">Cargando partidos...</div>
+    </div>
+  </div>
+
 </div>
 
 <!-- ══ SCREEN: LOBBY ══════════════════════════════ -->
@@ -856,10 +893,13 @@ function listenLiveSessions() {
   sessionsListener = ref.on('value', snap => {
     const data  = snap.val() || {};
     const grid  = document.getElementById('sessionsGrid');
+    const authGrid = document.getElementById('authSessionsGrid');
     const items = Object.entries(data).filter(([k,v]) => v.live === true);
 
     if (!items.length) {
-      grid.innerHTML = '<div class="no-sessions">No hay partidos en vivo ahora mismo.</div>';
+      const noMsg = '<div class="no-sessions">No hay partidos en vivo ahora mismo.</div>';
+      grid.innerHTML = noMsg;
+      if (authGrid) authGrid.innerHTML = noMsg;
       return;
     }
 
@@ -882,6 +922,7 @@ function listenLiveSessions() {
           </div>
         </div>`;
     }).join('');
+    if (authGrid) authGrid.innerHTML = grid.innerHTML;
   });
 }
 
