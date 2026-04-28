@@ -212,17 +212,15 @@ body, html {
 ══════════════════════════════════════════ */
 #screenAuth {
   align-items: center;
-  justify-content: flex-start;
-  padding: 40px 20px 60px;
-  gap: 36px;
+  padding: 30px 20px calc(var(--sponsor-h) + 20px);
+  gap: 28px;
   overflow-y: auto;
 }
 #authBox {
-  background: rgba(10,10,30,0.95);
-  padding: 24px 32px;
-  border-radius: 20px;
+  background: rgba(0,0,0,0.5);
   border: 1px solid rgba(255,255,255,0.08);
-  box-shadow: 0 0 60px rgba(0,0,0,0.9);
+  border-radius: 20px;
+  padding: 24px 28px;
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
@@ -231,21 +229,17 @@ body, html {
   width: 100%;
   max-width: 900px;
 }
-#authBox h2 {
-  font-family: 'Oswald', sans-serif;
-  text-align: center; font-size: 1.5em; letter-spacing: 4px;
-  text-transform: uppercase;
-  width: 100%;
-}
+/* authBox h2 removed - using lobby-header instead */
 #authBox h2 span { color: var(--home); }
 #authBox input {
-  padding: 12px 16px; font-size: 1.05em;
+  padding: 11px 16px; font-size: 1.05em;
   font-family: 'Rajdhani', sans-serif;
-  border-radius: 8px; border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 8px; border: 1px solid rgba(255,255,255,0.12);
   background: rgba(255,255,255,0.06); color: white;
   outline: none; transition: border-color 0.2s;
   flex: 1; min-width: 150px;
 }
+#authBox input:focus { border-color: var(--cyan); }
 #authBox input:focus { border-color: var(--cyan); }
 .auth-tabs {
   display: flex; gap: 0;
@@ -270,6 +264,7 @@ body, html {
   box-shadow: 0 0 20px rgba(0,230,118,0.4);
   flex-shrink: 0; align-self: stretch;
 }
+#authBtn:hover { transform: translateY(-2px); box-shadow: 0 0 30px rgba(0,230,118,0.6); }
 #authBtn:hover { transform: translateY(-2px); }
 #authError { color: var(--home); text-align: center; font-weight: 600; font-size: 0.95em; min-height: 1.2em; width: 100%; }
 .btn-back-lobby {
@@ -566,7 +561,7 @@ body, html {
 }
 
 #authLiveSection {
-  width: 100%; max-width: 900px;
+  width: 100%; max-width: 680px;
 }
 #authLiveSection h3 {
   font-family: 'Oswald', sans-serif;
@@ -588,9 +583,14 @@ body, html {
 <!-- ══ SCREEN: AUTH ═══════════════════════════════ -->
 <div id="screenAuth" class="screen active">
 
-  <!-- Login box (horizontal) -->
+  <!-- Same header as lobby -->
+  <div class="lobby-header">
+    <h1>🎾 Marcador <span>Pádel</span></h1>
+    <div class="lobby-subtitle">Sistema de marcador en vivo</div>
+  </div>
+
+  <!-- Login box -->
   <div id="authBox">
-    <h2>🎾 Marcador <span>Pádel</span></h2>
     <input type="email"    id="authEmail"    placeholder="Correo electrónico" autocomplete="email" />
     <input type="password" id="authPassword" placeholder="Contraseña"         autocomplete="current-password" />
     <input type="text"     id="authName"     placeholder="Nombre de usuario"  style="display:none" />
