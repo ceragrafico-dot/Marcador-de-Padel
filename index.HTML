@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -576,6 +578,60 @@ body, html {
   #authBtn { width: 100% !important; flex-shrink: unset !important; }
   .auth-tabs { width: 100% !important; }
 }
+
+#gestureModal {
+  display: none; position: fixed; inset: 0; z-index: 500;
+  align-items: center; justify-content: center;
+  background: rgba(0,0,0,0.75); backdrop-filter: blur(4px);
+}
+#gestureModal.open { display: flex; }
+.gesture-box {
+  background: rgba(10,10,30,0.97);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 20px; padding: 32px 36px;
+  width: 340px; display: flex; flex-direction: column; gap: 18px;
+}
+.gesture-box h3 {
+  font-family: 'Oswald', sans-serif; font-size: 1.3em;
+  letter-spacing: 3px; text-transform: uppercase; color: white;
+  margin: 0;
+}
+.gesture-row {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+}
+.gesture-label {
+  font-family: 'Rajdhani', sans-serif; font-size: 1em;
+  color: rgba(255,255,255,0.7); flex: 1;
+}
+.gesture-select {
+  font-family: 'Rajdhani', sans-serif; font-size: 1em;
+  background: rgba(255,255,255,0.07); color: white;
+  border: 1px solid rgba(255,255,255,0.15); border-radius: 8px;
+  padding: 7px 10px; outline: none; cursor: pointer; flex: 1;
+}
+.gesture-select option { background: #1a1a2e; }
+.gesture-indicator {
+  position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
+  background: rgba(0,0,0,0.85); color: white;
+  font-family: 'Oswald', sans-serif; font-size: 1.1em; letter-spacing: 2px;
+  padding: 10px 24px; border-radius: 30px;
+  pointer-events: none; opacity: 0;
+  transition: opacity 0.15s; z-index: 999;
+  border: 1px solid rgba(255,255,255,0.15);
+}
+.gesture-indicator.show { opacity: 1; }
+.btn-close-gesture {
+  padding: 11px; font-family: 'Oswald', sans-serif;
+  font-size: 1em; letter-spacing: 2px; text-transform: uppercase;
+  border: 1px solid rgba(255,255,255,0.2); border-radius: 10px;
+  background: transparent; color: white; cursor: pointer;
+  transition: background 0.2s;
+}
+.btn-close-gesture:hover { background: rgba(255,255,255,0.08); }
+.gesture-hint {
+  font-size: 0.82em; color: rgba(255,255,255,0.35);
+  font-family: 'Rajdhani', sans-serif; text-align: center;
+}
 </style>
 </head>
 <body>
@@ -705,6 +761,7 @@ body, html {
     <button class="fullBtn"  onclick="toggleFullScreen()">⛶ FULL</button>
     <button class="whatsBtn" onclick="enviarWhatsApp()">📲 ENVIAR</button>
     <button class="lobbyBtn" onclick="irLobby()">🏠 LOBBY</button>
+    <button class="fullBtn" style="background:#4a4a6a;box-shadow:none" onclick="openGestureModal()">🕹️ GESTOS</button>
   </div>
 
   <!-- Viewer back button -->
@@ -714,6 +771,42 @@ body, html {
   </div>
 
 </div>
+
+<!-- ══ GESTURE MODAL ════════════════════════════ -->
+<div id="gestureModal">
+  <div class="gesture-box">
+    <h3>🕹️ Gestos BT</h3>
+    <div class="gesture-row">
+      <span class="gesture-label">📜 Scroll arriba</span>
+      <select class="gesture-select" id="gestureUp">
+        <option value="sumar_home">+ HOME</option>
+        <option value="restar_home">− HOME</option>
+        <option value="sumar_guest">+ GUEST</option>
+        <option value="restar_guest">− GUEST</option>
+        <option value="deshacer">↩ UNDO</option>
+        <option value="cambiarSaque">⇄ SAQUE</option>
+        <option value="ninguna">— Ninguna —</option>
+      </select>
+    </div>
+    <div class="gesture-row">
+      <span class="gesture-label">📜 Scroll abajo</span>
+      <select class="gesture-select" id="gestureDown">
+        <option value="sumar_home">+ HOME</option>
+        <option value="restar_home" selected>− HOME</option>
+        <option value="sumar_guest">+ GUEST</option>
+        <option value="restar_guest">− GUEST</option>
+        <option value="deshacer">↩ UNDO</option>
+        <option value="cambiarSaque">⇄ SAQUE</option>
+        <option value="ninguna">— Ninguna —</option>
+      </select>
+    </div>
+    <p class="gesture-hint">Los cambios se guardan automáticamente</p>
+    <button class="btn-close-gesture" onclick="closeGestureModal()">Cerrar</button>
+  </div>
+</div>
+
+<!-- Feedback visual de gesto -->
+<div class="gesture-indicator" id="gestureIndicator"></div>
 
 <!-- ══ SPONSOR BAR ════════════════════════════════ -->
 <div id="sponsorBar">
@@ -1547,6 +1640,93 @@ function removeSponsor(key) {
 function escHtml(str) {
   return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
+
+
+// ════════════════════════════════════════════════════
+//  GESTOS BLUETOOTH
+// ════════════════════════════════════════════════════
+const GESTURE_ACTIONS = {
+  sumar_home:   () => sumar('home'),
+  restar_home:  () => restar('home'),
+  sumar_guest:  () => sumar('guest'),
+  restar_guest: () => restar('guest'),
+  deshacer:     () => deshacer(),
+  cambiarSaque: () => cambiarSaque(),
+  ninguna:      () => {}
+};
+const GESTURE_LABELS = {
+  sumar_home:'+ HOME', restar_home:'− HOME',
+  sumar_guest:'+ GUEST', restar_guest:'− GUEST',
+  deshacer:'↩ UNDO', cambiarSaque:'⇄ SAQUE', ninguna:''
+};
+
+let gestureMap = {
+  up:   localStorage.getItem('gestureUp')   || 'sumar_home',
+  down: localStorage.getItem('gestureDown') || 'restar_home'
+};
+
+function applyGestureMap() {
+  const up   = document.getElementById('gestureUp');
+  const down = document.getElementById('gestureDown');
+  if (up)   up.value   = gestureMap.up;
+  if (down) down.value = gestureMap.down;
+}
+
+function openGestureModal() {
+  applyGestureMap();
+  document.getElementById('gestureModal').classList.add('open');
+}
+function closeGestureModal() {
+  gestureMap.up   = document.getElementById('gestureUp').value;
+  gestureMap.down = document.getElementById('gestureDown').value;
+  localStorage.setItem('gestureUp',   gestureMap.up);
+  localStorage.setItem('gestureDown', gestureMap.down);
+  document.getElementById('gestureModal').classList.remove('open');
+}
+
+let indicatorTimer = null;
+function showGestureIndicator(action) {
+  const label = GESTURE_LABELS[action];
+  if (!label) return;
+  const el = document.getElementById('gestureIndicator');
+  el.textContent = label;
+  el.classList.add('show');
+  clearTimeout(indicatorTimer);
+  indicatorTimer = setTimeout(() => el.classList.remove('show'), 900);
+}
+
+let lastWheelTime = 0;
+window.addEventListener('wheel', e => {
+  const screen = document.getElementById('screenScore');
+  if (!screen || !screen.classList.contains('active')) return;
+  e.preventDefault();
+  const now = Date.now();
+  if (now - lastWheelTime < 400) return; // debounce
+  lastWheelTime = now;
+  const action = e.deltaY < 0 ? gestureMap.up : gestureMap.down;
+  if (GESTURE_ACTIONS[action]) {
+    GESTURE_ACTIONS[action]();
+    showGestureIndicator(action);
+  }
+}, { passive: false });
+
+// Touch swipe support (iPhone)
+let touchStartY = 0;
+window.addEventListener('touchstart', e => {
+  touchStartY = e.touches[0].clientY;
+}, { passive: true });
+
+window.addEventListener('touchend', e => {
+  const screen = document.getElementById('screenScore');
+  if (!screen || !screen.classList.contains('active')) return;
+  const diff = touchStartY - e.changedTouches[0].clientY;
+  if (Math.abs(diff) < 40) return; // mínimo 40px de swipe
+  const action = diff > 0 ? gestureMap.up : gestureMap.down;
+  if (GESTURE_ACTIONS[action]) {
+    GESTURE_ACTIONS[action]();
+    showGestureIndicator(action);
+  }
+}, { passive: true });
 
 // ════════════════════════════════════════════════════
 //  INIT
