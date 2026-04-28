@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -1399,24 +1401,67 @@ function iniciarCronometro() {
 //  WHATSAPP
 // ════════════════════════════════════════════════════
 function enviarWhatsApp() {
-  const cron=document.getElementById('cronometro').textContent;
-  let sH=0, sG=0;
-  for (let i=0;i<=setActual;i++) {
-    if (setsHome[i]>setsGuest[i]) sH++;
-    else if (setsGuest[i]>setsHome[i]) sG++;
-  }
-  let txt=`🎾 *Partido de Pádel*\n📌 ${gameTitle}\n\n`;
-  txt+=`🏆 *${nombreHome}*: ${sH} sets\n🏆 *${nombreGuest}*: ${sG} sets\n\n`;
-  txt+=`📊 *Sets:*\n`;
-  for (let i=0;i<=setActual;i++) {
-    if (setsHome[i]>0||setsGuest[i]>0) txt+=`  Set ${i+1}: ${setsHome[i]} - ${setsGuest[i]}\n`;
-  }
-  txt+=`\n⏱️ ${cron}\n_Marcador en vivo 🎾_`;
-  const num=prompt('Número WhatsApp (sin + ni espacios):');
-  if (!num||!num.trim()) return;
-  window.open(`https://wa.me/${num.trim()}?text=${encodeURIComponent(txt)}`, '_blank');
-}
+  const cron  = document.getElementById('cronometro').textContent;
+  const ahora = new Date().toLocaleString('es-ES', { dateStyle:'short', timeStyle:'short' });
 
+  // Contar sets ganados
+  let sH = 0, sG = 0;
+  for (let i = 0; i <= setActual; i++) {
+    if (setsHome[i]  > setsGuest[i]) sH++;
+    else if (setsGuest[i] > setsHome[i]) sG++;
+  }
+  const ganador = sH > sG ? nombreHome : sG > sH ? nombreGuest : null;
+
+  // Separador visual
+  const sep  = '▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬';
+  const sep2 = '┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄';
+
+  // Construir marcador de sets
+  let detalleSets = '';
+  for (let i = 0; i <= setActual; i++) {
+    if (setsHome[i] > 0 || setsGuest[i] > 0) {
+      const setGanador = setsHome[i] > setsGuest[i] ? '🔴' : setsGuest[i] > setsHome[i] ? '🟢' : '⚪';
+      detalleSets += `${setGanador} Set ${i+1}:  *${setsHome[i]}* – *${setsGuest[i]}*\n`;
+    }
+  }
+
+  let txt = '';
+  txt += `🎾 *MARCADOR DE PÁDEL*\n`;
+  txt += `${sep}\n`;
+  if (gameTitle) txt += `📌 ${gameTitle}\n`;
+  txt += `📅 ${ahora}\n`;
+  txt += `${sep}\n\n`;
+
+  // Resultado principal
+  txt += `🏆 *RESULTADO FINAL*\n`;
+  txt += `${sep2}\n`;
+  txt += `🔴 *${nombreHome}*\n`;
+  txt += `🟢 *${nombreGuest}*\n`;
+  txt += `${sep2}\n`;
+  txt += `     ${sH}  —  ${sG}\n`;
+  txt += `${sep2}\n\n`;
+
+  // Detalle de sets
+  if (detalleSets) {
+    txt += `📊 *DETALLE DE SETS*\n`;
+    txt += detalleSets;
+    txt += `\n`;
+  }
+
+  // Ganador
+  if (ganador) {
+    txt += `🥇 *¡${ganador} gana el partido!*\n`;
+    txt += `\n`;
+  }
+
+  txt += `⏱️ Duración: *${cron}*\n`;
+  txt += `${sep}\n`;
+  txt += `_Enviado desde Marcador Pádel 🎾_`;
+
+  const num = prompt('Número WhatsApp (sin + ni espacios, ej: 50760000000):');
+  if (!num || !num.trim()) return;
+  window.open('https://wa.me/' + num.trim() + '?text=' + encodeURIComponent(txt), '_blank');
+}
 function toggleFullScreen() {
   if (!document.fullscreenElement) document.documentElement.requestFullscreen();
   else document.exitFullscreen();
