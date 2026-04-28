@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -761,7 +759,6 @@ body, html {
     <button class="fullBtn"  onclick="toggleFullScreen()">⛶ FULL</button>
     <button class="whatsBtn" onclick="enviarWhatsApp()">📲 ENVIAR</button>
     <button class="lobbyBtn" onclick="irLobby()">🏠 LOBBY</button>
-    <button class="fullBtn" style="background:#4a4a6a;box-shadow:none" onclick="openGestureModal()">🕹️ GESTOS</button>
   </div>
 
   <!-- Viewer back button -->
@@ -795,6 +792,30 @@ body, html {
         <option value="restar_home" selected>− HOME</option>
         <option value="sumar_guest">+ GUEST</option>
         <option value="restar_guest">− GUEST</option>
+        <option value="deshacer">↩ UNDO</option>
+        <option value="cambiarSaque">⇄ SAQUE</option>
+        <option value="ninguna">— Ninguna —</option>
+      </select>
+    </div>
+    <div class="gesture-row">
+      <span class="gesture-label">👈 Scroll izquierda</span>
+      <select class="gesture-select" id="gestureLeft">
+        <option value="sumar_home">+ HOME</option>
+        <option value="restar_home">− HOME</option>
+        <option value="sumar_guest" selected>+ GUEST</option>
+        <option value="restar_guest">− GUEST</option>
+        <option value="deshacer">↩ UNDO</option>
+        <option value="cambiarSaque">⇄ SAQUE</option>
+        <option value="ninguna">— Ninguna —</option>
+      </select>
+    </div>
+    <div class="gesture-row">
+      <span class="gesture-label">👉 Scroll derecha</span>
+      <select class="gesture-select" id="gestureRight">
+        <option value="sumar_home">+ HOME</option>
+        <option value="restar_home">− HOME</option>
+        <option value="sumar_guest">+ GUEST</option>
+        <option value="restar_guest" selected>− GUEST</option>
         <option value="deshacer">↩ UNDO</option>
         <option value="cambiarSaque">⇄ SAQUE</option>
         <option value="ninguna">— Ninguna —</option>
@@ -1661,15 +1682,21 @@ const GESTURE_LABELS = {
 };
 
 let gestureMap = {
-  up:   localStorage.getItem('gestureUp')   || 'sumar_home',
-  down: localStorage.getItem('gestureDown') || 'restar_home'
+  up:    'sumar_guest',
+  down:  'sumar_home',
+  left:  'ninguna',
+  right: 'ninguna'
 };
 
 function applyGestureMap() {
-  const up   = document.getElementById('gestureUp');
-  const down = document.getElementById('gestureDown');
-  if (up)   up.value   = gestureMap.up;
-  if (down) down.value = gestureMap.down;
+  const up    = document.getElementById('gestureUp');
+  const down  = document.getElementById('gestureDown');
+  const left  = document.getElementById('gestureLeft');
+  const right = document.getElementById('gestureRight');
+  if (up)    up.value    = gestureMap.up;
+  if (down)  down.value  = gestureMap.down;
+  if (left)  left.value  = gestureMap.left;
+  if (right) right.value = gestureMap.right;
 }
 
 function openGestureModal() {
@@ -1677,10 +1704,14 @@ function openGestureModal() {
   document.getElementById('gestureModal').classList.add('open');
 }
 function closeGestureModal() {
-  gestureMap.up   = document.getElementById('gestureUp').value;
-  gestureMap.down = document.getElementById('gestureDown').value;
-  localStorage.setItem('gestureUp',   gestureMap.up);
-  localStorage.setItem('gestureDown', gestureMap.down);
+  gestureMap.up    = document.getElementById('gestureUp').value;
+  gestureMap.down  = document.getElementById('gestureDown').value;
+  gestureMap.left  = document.getElementById('gestureLeft').value;
+  gestureMap.right = document.getElementById('gestureRight').value;
+  localStorage.setItem('gestureUp',    gestureMap.up);
+  localStorage.setItem('gestureDown',  gestureMap.down);
+  localStorage.setItem('gestureLeft',  gestureMap.left);
+  localStorage.setItem('gestureRight', gestureMap.right);
   document.getElementById('gestureModal').classList.remove('open');
 }
 
@@ -1697,18 +1728,43 @@ function showGestureIndicator(action) {
 
 let lastWheelTime = 0;
 window.addEventListener('wheel', e => {
-  const screen = document.getElementById('screenScore');
+  const screen = document.getElementById('screenMarcador');
   if (!screen || !screen.classList.contains('active')) return;
   e.preventDefault();
   const now = Date.now();
-  if (now - lastWheelTime < 400) return; // debounce
+  if (now - lastWheelTime < 350) return;
+
+  // Determine dominant axis
+  const absX = Math.abs(e.deltaX);
+  const absY = Math.abs(e.deltaY);
+  if (absX < 5 && absY < 5) return; // ignore tiny movements
+
+  let action;
+  if (absX > absY) {
+    // Horizontal scroll
+    action = e.deltaX > 0 ? gestureMap.right : gestureMap.left;
+  } else {
+    // Vertical scroll
+    action = e.deltaY < 0 ? gestureMap.up : gestureMap.down;
+  }
+
   lastWheelTime = now;
-  const action = e.deltaY < 0 ? gestureMap.up : gestureMap.down;
   if (GESTURE_ACTIONS[action]) {
     GESTURE_ACTIONS[action]();
     showGestureIndicator(action);
   }
 }, { passive: false });
+
+// Intercept Enter/Space to trigger UNDO instead of activating focused button
+window.addEventListener('keydown', e => {
+  const screen = document.getElementById('screenMarcador');
+  if (!screen || !screen.classList.contains('active')) return;
+  if (e.key === 'Enter' || e.key === ' ') {
+    e.preventDefault();
+    deshacer();
+    showGestureIndicator('deshacer');
+  }
+});
 
 // Touch swipe support (iPhone)
 let touchStartY = 0;
@@ -1717,7 +1773,7 @@ window.addEventListener('touchstart', e => {
 }, { passive: true });
 
 window.addEventListener('touchend', e => {
-  const screen = document.getElementById('screenScore');
+  const screen = document.getElementById('screenMarcador');
   if (!screen || !screen.classList.contains('active')) return;
   const diff = touchStartY - e.changedTouches[0].clientY;
   if (Math.abs(diff) < 40) return; // mínimo 40px de swipe
