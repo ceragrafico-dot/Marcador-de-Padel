@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -1158,11 +1157,12 @@ function startNewGame() {
   gameTitle   = title;
 
   const state = buildState();
-  state.uid       = currentUser.uid;
-  state.owner     = currentUser.displayName || currentUser.email;
-  state.title     = title;
-  state.live      = true;
-  state.createdAt = Date.now();
+  state.uid            = currentUser.uid;
+  state.owner          = currentUser.displayName || currentUser.email;
+  state.title          = title;
+  state.live           = true;
+  state.createdAt      = Date.now();
+  state.matchStartedAt = Date.now(); // used by all clients for the timer
 
   const ref = db.ref('sessions').push(state);
   currentGameId = ref.key;
@@ -1224,7 +1224,7 @@ function listenGame(key) {
           if (setsHome[i] > 0 || setsGuest[i] > 0) detalle.push(setsHome[i] + '-' + setsGuest[i]);
         }
         clearInterval(timerInterval);
-        mostrarPantallaGanador(v.winner, detalle.join('  |  '));
+        mostrarPantallaGanador(v.winner, detalle.join('  |  '), v.duration || null);
       }
     }
   });
@@ -1242,6 +1242,18 @@ function loadStateFrom(v) {
   enTiebreak   = v.enTiebreak   ?? false;
   gameTitle    = v.title        ?? '';
   historial    = v.historial    ?? [];
+
+  // Store matchStartedAt globally so the timer uses the same origin for all clients
+  if (v.matchStartedAt) {
+    const prev = window._matchStartedAt;
+    window._matchStartedAt = v.matchStartedAt;
+    // Restart timer if the start time changed (e.g. after reset)
+    if (prev !== v.matchStartedAt) {
+      clearInterval(timerInterval);
+      iniciarCronometro(v.matchStartedAt);
+    }
+  }
+
   // Update owner corner label for viewers
   const ol = document.getElementById('viewerOwnerLabel');
   if (ol && v.owner) ol.textContent = '👤 ' + v.owner;
@@ -1269,7 +1281,8 @@ function enterMarcador(owner) {
 
   actualizarMarcador();
   clearInterval(timerInterval);
-  iniciarCronometro();
+  // matchStartedAt is loaded from Firebase via loadStateFrom — use it if available
+  iniciarCronometro(window._matchStartedAt || null);
 }
 
 function irLobby() {
@@ -1379,19 +1392,30 @@ function terminarPartido(ganador) {
   for (let i=0;i<=setActual;i++) {
     if (setsHome[i]>0||setsGuest[i]>0) detalle.push(setsHome[i]+'-'+setsGuest[i]);
   }
+  // Calculate match duration from Firebase timestamp
+  const durSecs = window._matchStartedAt
+    ? Math.floor((Date.now() - window._matchStartedAt) / 1000)
+    : null;
+  const durStr = durSecs !== null
+    ? String(Math.floor(durSecs/3600)).padStart(2,'0') + ':' +
+      String(Math.floor((durSecs%3600)/60)).padStart(2,'0') + ':' +
+      String(durSecs%60).padStart(2,'0')
+    : document.getElementById('cronometro').textContent;
+
   if (isOwner && currentGameId) {
     db.ref('sessions/'+currentGameId).update({
       live: false,
       finished: true,
       winner: ganador,
+      duration: durStr,
       finishedAt: Date.now()
     });
   }
   clearInterval(timerInterval);
-  mostrarPantallaGanador(ganador, detalle.join('  |  '));
+  mostrarPantallaGanador(ganador, detalle.join('  |  '), durStr);
 }
 
-function mostrarPantallaGanador(ganador, detalle) {
+function mostrarPantallaGanador(ganador, detalle, duracion) {
   const overlay = document.createElement('div');
   overlay.id = 'winnerOverlay';
   overlay.style.cssText = 'position:fixed;inset:0;z-index:2000;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(0,0,0,0.92);backdrop-filter:blur(12px);gap:24px;padding:40px 20px;text-align:center;';
@@ -1404,6 +1428,7 @@ function mostrarPantallaGanador(ganador, detalle) {
     '<div style="font-family:Oswald,sans-serif;font-size:3.2em;font-weight:700;color:' + color + ';letter-spacing:4px;text-shadow:0 0 30px ' + color + ',0 0 60px ' + color + ';text-transform:uppercase;">' + escHtml(ganador) + '</div>' +
     '<div style="font-family:Oswald,sans-serif;font-size:1.1em;letter-spacing:3px;color:rgba(255,255,255,0.5);">' + escHtml(gameTitle) + '</div>' +
     '<div style="font-family:Oswald,sans-serif;font-size:1.8em;letter-spacing:4px;color:#ffd700;">' + escHtml(detalle) + '</div>' +
+    (duracion ? '<div style="font-family:Rajdhani,sans-serif;font-size:1em;letter-spacing:3px;color:rgba(255,255,255,0.4);margin-top:-8px;">⏱ Duración: ' + escHtml(duracion) + '</div>' : '') +
     '<div style="display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-top:12px;">' +
       '<button onclick="document.getElementById(&quot;winnerOverlay&quot;).remove();irLobby()" style="font-family:Oswald,sans-serif;padding:13px 30px;font-size:1.1em;letter-spacing:3px;border:1px solid rgba(255,255,255,0.2);border-radius:12px;background:rgba(255,255,255,0.1);color:white;cursor:pointer;text-transform:uppercase;">\u{1F3E0} Volver al Lobby</button>' +
       waBtn +
@@ -1489,11 +1514,11 @@ function resetear() {
   if (!isOwner) return;
   if (!confirm('¿Resetear el marcador completamente?')) return;
   resetState();
-  historial=[];
+  historial = [];
+  window._matchStartedAt = Date.now();
   actualizarMarcador();
   guardarEstado();
-  clearInterval(timerInterval);
-  iniciarCronometro();
+  // Timer will restart via loadStateFrom when Firebase echoes back
 }
 
 function resetState() {
@@ -1509,10 +1534,11 @@ function resetState() {
 function buildState() {
   return {
     idxHome, idxGuest,
-    setsHome:[...setsHome], setsGuest:[...setsGuest],
+    setsHome: [...setsHome], setsGuest: [...setsGuest],
     setActual, saqueDerecha, enTiebreak,
     nombreHome, nombreGuest,
-    historial: historial.slice(-20), // keep last 20 snapshots
+    historial: historial.slice(-20),
+    matchStartedAt: window._matchStartedAt || Date.now(),
     updatedAt: Date.now()
   };
 }
@@ -1586,17 +1612,19 @@ function flashPanel() {
 // ════════════════════════════════════════════════════
 //  CRONÓMETRO
 // ════════════════════════════════════════════════════
-function iniciarCronometro() {
-  inicio=new Date();
-  const cron=document.getElementById('cronometro');
+function iniciarCronometro(startTimestamp) {
+  // startTimestamp: Unix ms from Firebase (same for everyone)
+  // If not provided, use now (fallback)
+  inicio = startTimestamp ? new Date(startTimestamp) : new Date();
+  const cron = document.getElementById('cronometro');
   clearInterval(timerInterval);
-  timerInterval=setInterval(()=>{
-    const diff=Math.floor((new Date()-inicio)/1000);
-    const h=String(Math.floor(diff/3600)).padStart(2,'0');
-    const m=String(Math.floor((diff%3600)/60)).padStart(2,'0');
-    const s=String(diff%60).padStart(2,'0');
-    cron.textContent=`${h}:${m}:${s}`;
-  },1000);
+  timerInterval = setInterval(() => {
+    const diff = Math.floor((new Date() - inicio) / 1000);
+    const h = String(Math.floor(diff / 3600)).padStart(2, '0');
+    const m = String(Math.floor((diff % 3600) / 60)).padStart(2, '0');
+    const s = String(diff % 60).padStart(2, '0');
+    cron.textContent = h + ':' + m + ':' + s;
+  }, 1000);
 }
 
 // ════════════════════════════════════════════════════
