@@ -4,7 +4,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Marcador Pádel de César</title>
+<title>Marcador Pádel</title>
 
 <!-- Firebase SDK -->
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
@@ -45,7 +45,7 @@ body, html {
 .screen.active { display: flex; }
 
 /* ══════════════════════════════════════════
-   PANTALLA DE INCIO O LOBBY
+   PANTALLA: LOBBY
 ══════════════════════════════════════════ */
 #screenLobby {
   align-items: center;
@@ -209,7 +209,7 @@ body, html {
 .btn-delete-game:hover { color: var(--home); }
 
 /* ══════════════════════════════════════════
-   PANTALLA PRINCIPAL
+   PANTALLA: AUTH MODAL
 ══════════════════════════════════════════ */
 #screenAuth {
   align-items: center;
@@ -277,7 +277,7 @@ body, html {
 .btn-back-lobby:hover { color: white; }
 
 /* ══════════════════════════════════════════
-   EL MARCADOR
+   PANTALLA: MARCADOR
 ══════════════════════════════════════════ */
 #screenMarcador {
   align-items: center;
@@ -443,7 +443,7 @@ body, html {
 .panel.setflash { animation: setFlash 0.8s ease; }
 
 /* ══════════════════════════════════════════
-   BARRA DE PATROCINADORES (global) (tengo que solucionar que aún no sale en global)
+   BARRA DE PATROCINADORES (global)
 ══════════════════════════════════════════ */
 #sponsorBar {
   position: fixed; bottom: 0; left: 0; right: 0;
@@ -1216,7 +1216,7 @@ function irLobby() {
 }
 
 // ════════════════════════════════════════════════════
-//  HELPERS DE DEUCE / VENTAJA
+//  DEUCE / VENTAJA RECORDAR MAS ADELANTE AGREGAR OPCIÓN DE ORO DIRECTO
 // ════════════════════════════════════════════════════
 function esDeuce()    { return idxHome === 3 && idxGuest === 3; }
 function hayVentaja() { return (idxHome===4&&idxGuest===3)||(idxHome===3&&idxGuest===4); }
@@ -1593,7 +1593,7 @@ function toggleFullScreen() {
 }
 
 // ════════════════════════════════════════════════════
-//  PATROCINADORES
+//  PATROCINADORES (EN UN FUTURO PODER AGREGARLO JAJAJA)
 // ════════════════════════════════════════════════════
 let sponsors = [];
 
@@ -1668,7 +1668,7 @@ function removeSponsor(key) {
 }
 
 // ════════════════════════════════════════════════════
-//  UTILS
+//  RETORNO
 // ════════════════════════════════════════════════════
 function escHtml(str) {
   return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
@@ -1676,7 +1676,7 @@ function escHtml(str) {
 
 
 // ════════════════════════════════════════════════════
-//  GESTOS BLUETOOTH
+//  GESTOS PARA EL ANILLO CONTROL
 // ════════════════════════════════════════════════════
 const GESTURE_ACTIONS = {
   sumar_home:   () => sumar('home'),
@@ -1802,7 +1802,6 @@ window.addEventListener('touchend', e => {
 // ════════════════════════════════════════════════════
 //  INIT
 // ════════════════════════════════════════════════════
-// Wire auth buttons safely after all scripts have loaded
 document.getElementById('tabLogin').addEventListener('click',       () => setAuthMode('login'));
 document.getElementById('tabSignup').addEventListener('click',      () => setAuthMode('signup'));
 document.getElementById('authBtn').addEventListener('click',        () => doAuth());
