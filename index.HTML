@@ -1248,7 +1248,7 @@ function sumarTiebreak(equipo) {
   if (equipo==='home') { idxHome++;  animarScore('scoreHome'); }
   else                 { idxGuest++; animarScore('scoreGuest'); }
   saqueDerecha=!saqueDerecha;
-  if ((idxHome>=7||idxGuest>=7)&&Math.abs(idxHome-idxGuest)>=2) {
+  if (idxHome>=7 || idxGuest>=7) {
     ganarJuego(idxHome>idxGuest?'home':'guest');
   }
 }
