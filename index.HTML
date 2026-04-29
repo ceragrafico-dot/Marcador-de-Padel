@@ -1149,6 +1149,17 @@ function listenGame(key) {
     if (!v) return;
     loadStateFrom(v);
     actualizarMarcador();
+    // Show winner screen to viewers when match finishes
+    if (!isOwner && v.finished && v.winner) {
+      if (!document.getElementById('winnerOverlay')) {
+        let detalle = [];
+        for (let i = 0; i <= setActual; i++) {
+          if (setsHome[i] > 0 || setsGuest[i] > 0) detalle.push(setsHome[i] + '-' + setsGuest[i]);
+        }
+        clearInterval(timerInterval);
+        mostrarPantallaGanador(v.winner, detalle.join('  |  '));
+      }
+    }
   });
 }
 
@@ -1309,9 +1320,7 @@ function mostrarPantallaGanador(ganador, detalle) {
   overlay.style.cssText = 'position:fixed;inset:0;z-index:2000;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(0,0,0,0.92);backdrop-filter:blur(12px);gap:24px;padding:40px 20px;text-align:center;';
   const isHome = ganador === nombreHome;
   const color  = isHome ? '#ff3b3b' : '#00e676';
-  const waBtn = isOwner
-    ? '<button onclick="compartirResultado()" style="font-family:Oswald,sans-serif;padding:13px 30px;font-size:1.1em;letter-spacing:3px;border:none;border-radius:12px;background:#25D366;color:white;cursor:pointer;text-transform:uppercase;">\u{1F4F2} WhatsApp</button>'
-    : '';
+  const waBtn = '<button onclick="compartirResultado()" style="font-family:Oswald,sans-serif;padding:13px 30px;font-size:1.1em;letter-spacing:3px;border:none;border-radius:12px;background:#25D366;color:white;cursor:pointer;text-transform:uppercase;">\u{1F4F2} WhatsApp</button>';
   overlay.innerHTML =
     '<div id="wTrophy" style="font-size:4em;display:inline-block">\u{1F3C6}</div>' +
     '<div style="font-family:Oswald,sans-serif;font-size:1em;letter-spacing:6px;color:rgba(255,255,255,0.4);text-transform:uppercase;">\u{a1}Campe\u{f3}n!</div>' +
