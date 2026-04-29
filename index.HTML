@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -460,7 +461,9 @@ body, html {
 .undoBtn  { background: #455a64; color: white; box-shadow: 0 4px 16px rgba(0,0,0,0.5); }
 .whatsBtn { background: #25D366; color: white; box-shadow: 0 4px 20px rgba(37,211,102,0.4); }
 .fullBtn  { background: #1565c0; color: white; box-shadow: 0 4px 20px rgba(21,101,192,0.4); }
-.lobbyBtn { background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.15); }
+.lobbyBtn     { background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.15); }
+.finalizarBtn { background: rgba(255,60,60,0.15); color: #ff6b6b; border: 1px solid rgba(255,60,60,0.3); }
+.finalizarBtn:hover { background: rgba(255,60,60,0.3) !important; }
 
 @keyframes setFlash {
   0%   { background: rgba(255,215,0,0.3); }
@@ -790,6 +793,7 @@ body, html {
     <button class="fullBtn"  onclick="toggleFullScreen()">⛶ FULL</button>
     <button class="whatsBtn" onclick="enviarWhatsApp()">📲 ENVIAR</button>
     <button class="lobbyBtn" onclick="irLobby()">🏠 LOBBY</button>
+    <button class="finalizarBtn" onclick="finalizarTransmision()">⏹ FINALIZAR</button>
   </div>
 
   <!-- Viewer back button -->
@@ -1291,10 +1295,8 @@ function irLobby() {
     window._presRef.remove();
     window._presRef = null;
   }
-  // set live=false when owner leaves
-  if (isOwner && currentGameId) {
-    db.ref('sessions/'+currentGameId+'/live').set(false);
-  }
+  // Owner just navigates away — partido stays live
+  // Use finalizarPartido() to explicitly end it
   if (sessionListener) {
     db.ref('sessions/'+sessionListener).off('value');
     sessionListener = null;
@@ -1303,6 +1305,15 @@ function irLobby() {
   currentGameId = null;
   isOwner = false;
   showScreen('screenLobby');
+}
+
+function finalizarTransmision() {
+  if (!isOwner) return;
+  if (!confirm('¿Finalizar la transmisión? El partido dejará de aparecer en los en vivos.')) return;
+  if (currentGameId) {
+    db.ref('sessions/'+currentGameId+'/live').set(false);
+  }
+  irLobby();
 }
 
 // ════════════════════════════════════════════════════
