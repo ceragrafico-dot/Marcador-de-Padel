@@ -179,6 +179,33 @@ body, html {
   color: rgba(255,255,255,0.3); font-size: 0.9em;
   font-style: italic; padding: 10px 0;
 }
+.session-meta-row {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-top: 4px; gap: 8px;
+}
+.session-owner {
+  font-size: 0.72em; color: rgba(255,255,255,0.35);
+  letter-spacing: 1px; white-space: nowrap;
+  overflow: hidden; text-overflow: ellipsis; max-width: 120px;
+}
+.session-viewers {
+  font-size: 0.72em; color: rgba(0,229,255,0.6);
+  letter-spacing: 1px; white-space: nowrap;
+}
+/* Corner info inside scoreboard for viewers */
+#viewerInfo {
+  position: absolute; top: 12px; right: 16px;
+  display: flex; flex-direction: column; align-items: flex-end; gap: 3px;
+}
+#viewerOwnerLabel {
+  font-size: 0.62em; letter-spacing: 1.5px;
+  color: rgba(255,255,255,0.3); font-family: 'Rajdhani', sans-serif;
+  text-transform: uppercase;
+}
+#viewerCountLabel {
+  font-size: 0.62em; letter-spacing: 1.5px;
+  color: rgba(0,229,255,0.55); font-family: 'Rajdhani', sans-serif;
+}
 
 /* My saved games */
 .saved-games-section {
@@ -710,6 +737,10 @@ body, html {
 
   <div class="panel" id="panel">
     <div class="game-title-bar" id="gameTitleBar"></div>
+    <div id="viewerInfo" style="display:none;">
+      <div id="viewerOwnerLabel"></div>
+      <div id="viewerCountLabel"></div>
+    </div>
     <div class="equipos">
       <div class="equipo">
         <div class="titulo home"  id="nombreHome"  onclick="editarNombre('home')">HOME</div>
@@ -1036,9 +1067,30 @@ function listenLiveSessions() {
           <div class="session-score-preview" style="font-size:0.8em;">
             Sets: ${setsH} | ${setsG}
           </div>
+          <div class="session-meta-row">
+            <span class="session-owner">👤 ${escHtml(v.owner || 'Usuario')}</span>
+            <span class="session-viewers" id="viewers-${key}">👁 ...</span>
+          </div>
         </div>`;
     }).join('');
     if (authGrid) authGrid.innerHTML = grid.innerHTML;
+
+    // Listen to viewer counts for each live session
+    items.forEach(([key]) => {
+      db.ref('sessions/' + key + '/viewers').on('value', snap => {
+        const count = snap.exists() ? Object.keys(snap.val()).length : 0;
+        // Update in both grids
+        ['viewers-'+key].forEach(id => {
+          const el = document.getElementById(id);
+          if (el) el.textContent = '👁 ' + count + (count === 1 ? ' espectador' : ' espectadores');
+        });
+        // Also update scoreboard corner if watching this session
+        if (currentGameId === key && !isOwner) {
+          const cl = document.getElementById('viewerCountLabel');
+          if (cl) cl.textContent = '👁 ' + count + (count === 1 ? ' espectador' : ' espectadores');
+        }
+      });
+    });
   });
 }
 
@@ -1133,6 +1185,21 @@ function watchSession(key) {
   isOwner = false;
   enterMarcador(false);
   listenGame(key);
+  registerPresence(key);
+}
+
+function registerPresence(key) {
+  // Use a random viewer ID stored in sessionStorage
+  let viewerId = sessionStorage.getItem('viewerId');
+  if (!viewerId) {
+    viewerId = 'v_' + Math.random().toString(36).slice(2, 10);
+    sessionStorage.setItem('viewerId', viewerId);
+  }
+  const presRef = db.ref('sessions/' + key + '/viewers/' + viewerId);
+  presRef.set(true);
+  presRef.onDisconnect().remove();
+  // Remove when going back to lobby
+  window._presRef = presRef;
 }
 
 // ════════════════════════════════════════════════════
@@ -1175,6 +1242,9 @@ function loadStateFrom(v) {
   enTiebreak   = v.enTiebreak   ?? false;
   gameTitle    = v.title        ?? '';
   historial    = v.historial    ?? [];
+  // Update owner corner label for viewers
+  const ol = document.getElementById('viewerOwnerLabel');
+  if (ol && v.owner) ol.textContent = '👤 ' + v.owner;
 }
 
 // ════════════════════════════════════════════════════
@@ -1187,6 +1257,8 @@ function enterMarcador(owner) {
   document.getElementById('ownerBotones').style.display  = owner ? 'flex' : 'none';
   document.getElementById('viewerBotones').style.display = owner ? 'none' : 'flex';
   document.getElementById('viewerBadge').style.display   = owner ? 'none' : 'block';
+  const vi = document.getElementById('viewerInfo');
+  if (vi) vi.style.display = owner ? 'none' : 'flex';
 
   ['nombreHome','nombreGuest'].forEach(id => {
     const el = document.getElementById(id);
@@ -1201,6 +1273,11 @@ function enterMarcador(owner) {
 }
 
 function irLobby() {
+  // Remove viewer presence
+  if (!isOwner && window._presRef) {
+    window._presRef.remove();
+    window._presRef = null;
+  }
   // set live=false when owner leaves
   if (isOwner && currentGameId) {
     db.ref('sessions/'+currentGameId+'/live').set(false);
