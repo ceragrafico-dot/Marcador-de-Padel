@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -1264,7 +1265,9 @@ function ganarJuego(equipo) {
 function verificarSet() {
   const h=setsHome[setActual], g=setsGuest[setActual];
   if (h===6&&g===6) { enTiebreak=true; idxHome=0; idxGuest=0; return; }
-  if ((h>=6||g>=6)&&Math.abs(h-g)>=2) {
+  // Si hubo tiebreak (7-6) el set ya está cerrado sin necesidad de ventaja
+  const fueConTiebreak = (h===7&&g===6) || (h===6&&g===7);
+  if (fueConTiebreak || ((h>=6||g>=6)&&Math.abs(h-g)>=2)) {
     flashPanel();
     // Contar sets ganados hasta ahora
     let sH=0, sG=0;
