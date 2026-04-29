@@ -1730,6 +1730,7 @@ let lastWheelTime = 0;
 window.addEventListener('wheel', e => {
   const screen = document.getElementById('screenMarcador');
   if (!screen || !screen.classList.contains('active')) return;
+  if (!isOwner) return; // espectadores no pueden modificar el marcador
   e.preventDefault();
   const now = Date.now();
   if (now - lastWheelTime < 350) return;
@@ -1759,6 +1760,7 @@ window.addEventListener('wheel', e => {
 window.addEventListener('keydown', e => {
   const screen = document.getElementById('screenMarcador');
   if (!screen || !screen.classList.contains('active')) return;
+  if (!isOwner) return;
   if (e.key === 'Enter' || e.key === ' ') {
     e.preventDefault();
     deshacer();
@@ -1775,6 +1777,7 @@ window.addEventListener('touchstart', e => {
 window.addEventListener('touchend', e => {
   const screen = document.getElementById('screenMarcador');
   if (!screen || !screen.classList.contains('active')) return;
+  if (!isOwner) return;
   const diff = touchStartY - e.changedTouches[0].clientY;
   if (Math.abs(diff) < 40) return; // mínimo 40px de swipe
   const action = diff > 0 ? gestureMap.up : gestureMap.down;
