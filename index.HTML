@@ -179,33 +179,6 @@ body, html {
   color: rgba(255,255,255,0.3); font-size: 0.9em;
   font-style: italic; padding: 10px 0;
 }
-.session-meta-row {
-  display: flex; align-items: center; justify-content: space-between;
-  margin-top: 4px; gap: 8px;
-}
-.session-owner {
-  font-size: 0.72em; color: rgba(255,255,255,0.35);
-  letter-spacing: 1px; white-space: nowrap;
-  overflow: hidden; text-overflow: ellipsis; max-width: 120px;
-}
-.session-viewers {
-  font-size: 0.72em; color: rgba(0,229,255,0.6);
-  letter-spacing: 1px; white-space: nowrap;
-}
-/* Corner info inside scoreboard for viewers */
-#viewerInfo {
-  position: absolute; top: 12px; right: 16px;
-  display: flex; flex-direction: column; align-items: flex-end; gap: 3px;
-}
-#viewerOwnerLabel {
-  font-size: 0.62em; letter-spacing: 1.5px;
-  color: rgba(255,255,255,0.3); font-family: 'Rajdhani', sans-serif;
-  text-transform: uppercase;
-}
-#viewerCountLabel {
-  font-size: 0.62em; letter-spacing: 1.5px;
-  color: rgba(0,229,255,0.55); font-family: 'Rajdhani', sans-serif;
-}
 
 /* My saved games */
 .saved-games-section {
@@ -239,35 +212,30 @@ body, html {
    PANTALLA: AUTH MODAL
 ══════════════════════════════════════════ */
 #screenAuth {
-  align-items: center;
-  padding: 30px 20px calc(var(--sponsor-h) + 20px);
-  gap: 28px;
-  overflow-y: auto;
+  align-items: center; justify-content: center;
 }
 #authBox {
-  background: rgba(0,0,0,0.5);
-  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(10,10,30,0.95);
+  padding: 48px 56px;
   border-radius: 20px;
-  padding: 24px 28px;
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 14px 18px;
-  width: 100%;
-  max-width: 900px;
+  border: 1px solid rgba(255,255,255,0.08);
+  box-shadow: 0 0 60px rgba(0,0,0,0.9);
+  display: flex; flex-direction: column; gap: 16px;
+  width: 340px;
 }
-/* authBox h2 removed - using lobby-header instead */
+#authBox h2 {
+  font-family: 'Oswald', sans-serif;
+  text-align: center; font-size: 1.7em; letter-spacing: 4px;
+  text-transform: uppercase;
+}
 #authBox h2 span { color: var(--home); }
 #authBox input {
-  padding: 11px 16px; font-size: 1.05em;
+  padding: 12px 16px; font-size: 1.05em;
   font-family: 'Rajdhani', sans-serif;
-  border-radius: 8px; border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 8px; border: 1px solid rgba(255,255,255,0.15);
   background: rgba(255,255,255,0.06); color: white;
   outline: none; transition: border-color 0.2s;
-  flex: 1; min-width: 150px;
 }
-#authBox input:focus { border-color: var(--cyan); }
 #authBox input:focus { border-color: var(--cyan); }
 .auth-tabs {
   display: flex; gap: 0;
@@ -275,26 +243,24 @@ body, html {
   border: 1px solid rgba(255,255,255,0.1);
 }
 .auth-tab {
-  flex: 1; padding: 6px 14px;
-  font-family: 'Oswald', sans-serif; font-size: 0.78em;
+  flex: 1; padding: 10px;
+  font-family: 'Oswald', sans-serif; font-size: 1em;
   letter-spacing: 2px; text-transform: uppercase;
   border: none; cursor: pointer; transition: all 0.2s;
-  background: rgba(255,255,255,0.04); color: rgba(255,255,255,0.45);
+  background: rgba(255,255,255,0.04); color: rgba(255,255,255,0.5);
 }
 .auth-tab.active { background: var(--cyan); color: #000; font-weight: 700; }
 #authBtn {
-  padding: 13px 28px; font-size: 1.05em;
+  padding: 13px; font-size: 1.15em;
   font-family: 'Oswald', sans-serif; letter-spacing: 3px;
   border: none; border-radius: 10px;
   background: linear-gradient(135deg,#00c853,#00e676);
   color: white; font-weight: 700; cursor: pointer;
   transition: all 0.25s; text-transform: uppercase;
   box-shadow: 0 0 20px rgba(0,230,118,0.4);
-  flex-shrink: 0; align-self: stretch;
 }
-#authBtn:hover { transform: translateY(-2px); box-shadow: 0 0 30px rgba(0,230,118,0.6); }
 #authBtn:hover { transform: translateY(-2px); }
-#authError { color: var(--home); text-align: center; font-weight: 600; font-size: 0.95em; min-height: 1.2em; width: 100%; }
+#authError { color: var(--home); text-align: center; font-weight: 600; font-size: 0.95em; min-height: 1.2em; }
 .btn-back-lobby {
   background: none; border: none; color: rgba(255,255,255,0.4);
   cursor: pointer; font-family: 'Rajdhani', sans-serif;
@@ -461,9 +427,7 @@ body, html {
 .undoBtn  { background: #455a64; color: white; box-shadow: 0 4px 16px rgba(0,0,0,0.5); }
 .whatsBtn { background: #25D366; color: white; box-shadow: 0 4px 20px rgba(37,211,102,0.4); }
 .fullBtn  { background: #1565c0; color: white; box-shadow: 0 4px 20px rgba(21,101,192,0.4); }
-.lobbyBtn     { background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.15); }
-.finalizarBtn { background: rgba(255,60,60,0.15); color: #ff6b6b; border: 1px solid rgba(255,60,60,0.3); }
-.finalizarBtn:hover { background: rgba(255,60,60,0.3) !important; }
+.lobbyBtn { background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.15); }
 
 @keyframes setFlash {
   0%   { background: rgba(255,215,0,0.3); }
@@ -590,54 +554,6 @@ body, html {
   #authBox { width: 90%; padding: 36px 24px; }
 }
 
-#authLiveSection {
-  width: 100%; max-width: 680px;
-}
-#authLiveSection h3 {
-  font-family: 'Oswald', sans-serif;
-  font-size: 1.2em; letter-spacing: 3px;
-  text-transform: uppercase;
-  color: rgba(255,255,255,0.7);
-  margin-bottom: 16px;
-}
-@media (max-width: 640px) {
-  #authBox { padding: 20px 16px !important; flex-direction: column !important; }
-  #authBox input { min-width: 100% !important; flex: unset !important; width: 100% !important; }
-  #authBtn { width: 100% !important; flex-shrink: unset !important; }
-  .auth-tabs { width: 100% !important; }
-}
-
-#gestureModal {
-  display: none; position: fixed; inset: 0; z-index: 500;
-  align-items: center; justify-content: center;
-  background: rgba(0,0,0,0.75); backdrop-filter: blur(4px);
-}
-#gestureModal.open { display: flex; }
-.gesture-box {
-  background: rgba(10,10,30,0.97);
-  border: 1px solid rgba(255,255,255,0.1);
-  border-radius: 20px; padding: 32px 36px;
-  width: 340px; display: flex; flex-direction: column; gap: 18px;
-}
-.gesture-box h3 {
-  font-family: 'Oswald', sans-serif; font-size: 1.3em;
-  letter-spacing: 3px; text-transform: uppercase; color: white;
-  margin: 0;
-}
-.gesture-row {
-  display: flex; align-items: center; justify-content: space-between; gap: 12px;
-}
-.gesture-label {
-  font-family: 'Rajdhani', sans-serif; font-size: 1em;
-  color: rgba(255,255,255,0.7); flex: 1;
-}
-.gesture-select {
-  font-family: 'Rajdhani', sans-serif; font-size: 1em;
-  background: rgba(255,255,255,0.07); color: white;
-  border: 1px solid rgba(255,255,255,0.15); border-radius: 8px;
-  padding: 7px 10px; outline: none; cursor: pointer; flex: 1;
-}
-.gesture-select option { background: #1a1a2e; }
 .gesture-indicator {
   position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
   background: rgba(0,0,0,0.85); color: white;
@@ -648,52 +564,25 @@ body, html {
   border: 1px solid rgba(255,255,255,0.15);
 }
 .gesture-indicator.show { opacity: 1; }
-.btn-close-gesture {
-  padding: 11px; font-family: 'Oswald', sans-serif;
-  font-size: 1em; letter-spacing: 2px; text-transform: uppercase;
-  border: 1px solid rgba(255,255,255,0.2); border-radius: 10px;
-  background: transparent; color: white; cursor: pointer;
-  transition: background 0.2s;
-}
-.btn-close-gesture:hover { background: rgba(255,255,255,0.08); }
-.gesture-hint {
-  font-size: 0.82em; color: rgba(255,255,255,0.35);
-  font-family: 'Rajdhani', sans-serif; text-align: center;
-}
 </style>
 </head>
 <body>
 
 <!-- ══ SCREEN: AUTH ═══════════════════════════════ -->
 <div id="screenAuth" class="screen active">
-
-  <!-- Same header as lobby -->
-  <div class="lobby-header">
-    <h1>🎾 Marcador <span>Pádel</span></h1>
-    <div class="lobby-subtitle">Sistema de marcador en vivo</div>
-  </div>
-
-  <!-- Login box -->
   <div id="authBox">
+    <h2>🎾 Marcador <span>Pádel</span></h2>
+    <div class="auth-tabs">
+      <button class="auth-tab active" id="tabLogin"  >Iniciar Sesión</button>
+      <button class="auth-tab"        id="tabSignup" >Registrarse</button>
+    </div>
     <input type="email"    id="authEmail"    placeholder="Correo electrónico" autocomplete="email" />
     <input type="password" id="authPassword" placeholder="Contraseña"         autocomplete="current-password" />
     <input type="text"     id="authName"     placeholder="Nombre de usuario"  style="display:none" />
-    <div class="auth-tabs">
-      <button class="auth-tab active" id="tabLogin">Iniciar Sesión</button>
-      <button class="auth-tab"        id="tabSignup">Registrarse</button>
-    </div>
-    <button id="authBtn">Entrar</button>
+    <button id="authBtn" >Entrar</button>
     <div id="authError"></div>
+    
   </div>
-
-  <!-- Partidos en vivo debajo del login -->
-  <div id="authLiveSection">
-    <h3>🔴 Partidos en Vivo</h3>
-    <div id="authSessionsGrid" class="sessions-grid">
-      <div class="no-sessions">Cargando partidos...</div>
-    </div>
-  </div>
-
 </div>
 
 <!-- ══ SCREEN: LOBBY ══════════════════════════════ -->
@@ -739,10 +628,6 @@ body, html {
 
   <div class="panel" id="panel">
     <div class="game-title-bar" id="gameTitleBar"></div>
-    <div id="viewerInfo" style="display:none;">
-      <div id="viewerOwnerLabel"></div>
-      <div id="viewerCountLabel"></div>
-    </div>
     <div class="equipos">
       <div class="equipo">
         <div class="titulo home"  id="nombreHome"  onclick="editarNombre('home')">HOME</div>
@@ -793,7 +678,6 @@ body, html {
     <button class="fullBtn"  onclick="toggleFullScreen()">⛶ FULL</button>
     <button class="whatsBtn" onclick="enviarWhatsApp()">📲 ENVIAR</button>
     <button class="lobbyBtn" onclick="irLobby()">🏠 LOBBY</button>
-    <button class="finalizarBtn" onclick="finalizarTransmision()">⏹ FINALIZAR</button>
   </div>
 
   <!-- Viewer back button -->
@@ -803,66 +687,6 @@ body, html {
   </div>
 
 </div>
-
-<!-- ══ GESTURE MODAL ════════════════════════════ -->
-<div id="gestureModal">
-  <div class="gesture-box">
-    <h3>🕹️ Gestos BT</h3>
-    <div class="gesture-row">
-      <span class="gesture-label">📜 Scroll arriba</span>
-      <select class="gesture-select" id="gestureUp">
-        <option value="sumar_home">+ HOME</option>
-        <option value="restar_home">− HOME</option>
-        <option value="sumar_guest">+ GUEST</option>
-        <option value="restar_guest">− GUEST</option>
-        <option value="deshacer">↩ UNDO</option>
-        <option value="cambiarSaque">⇄ SAQUE</option>
-        <option value="ninguna">— Ninguna —</option>
-      </select>
-    </div>
-    <div class="gesture-row">
-      <span class="gesture-label">📜 Scroll abajo</span>
-      <select class="gesture-select" id="gestureDown">
-        <option value="sumar_home">+ HOME</option>
-        <option value="restar_home" selected>− HOME</option>
-        <option value="sumar_guest">+ GUEST</option>
-        <option value="restar_guest">− GUEST</option>
-        <option value="deshacer">↩ UNDO</option>
-        <option value="cambiarSaque">⇄ SAQUE</option>
-        <option value="ninguna">— Ninguna —</option>
-      </select>
-    </div>
-    <div class="gesture-row">
-      <span class="gesture-label">👈 Scroll izquierda</span>
-      <select class="gesture-select" id="gestureLeft">
-        <option value="sumar_home">+ HOME</option>
-        <option value="restar_home">− HOME</option>
-        <option value="sumar_guest" selected>+ GUEST</option>
-        <option value="restar_guest">− GUEST</option>
-        <option value="deshacer">↩ UNDO</option>
-        <option value="cambiarSaque">⇄ SAQUE</option>
-        <option value="ninguna">— Ninguna —</option>
-      </select>
-    </div>
-    <div class="gesture-row">
-      <span class="gesture-label">👉 Scroll derecha</span>
-      <select class="gesture-select" id="gestureRight">
-        <option value="sumar_home">+ HOME</option>
-        <option value="restar_home">− HOME</option>
-        <option value="sumar_guest">+ GUEST</option>
-        <option value="restar_guest" selected>− GUEST</option>
-        <option value="deshacer">↩ UNDO</option>
-        <option value="cambiarSaque">⇄ SAQUE</option>
-        <option value="ninguna">— Ninguna —</option>
-      </select>
-    </div>
-    <p class="gesture-hint">Los cambios se guardan automáticamente</p>
-    <button class="btn-close-gesture" onclick="closeGestureModal()">Cerrar</button>
-  </div>
-</div>
-
-<!-- Feedback visual de gesto -->
-<div class="gesture-indicator" id="gestureIndicator"></div>
 
 <!-- ══ SPONSOR BAR ════════════════════════════════ -->
 <div id="sponsorBar">
@@ -877,9 +701,8 @@ body, html {
 <div id="sponsorModal">
   <div class="sponsor-modal-box">
     <h3>🎯 Patrocinadores</h3>
-    <input type="text" id="sponsorName"  placeholder="Nombre (si no hay imagen)" maxlength="30" />
-    <input type="text" id="sponsorImage" placeholder="URL de imagen (opcional)" maxlength="300" />
-    <input type="text" id="sponsorColor" placeholder="Color del texto (ej: #ffd700)" maxlength="20" />
+    <input type="text" id="sponsorName"  placeholder="Nombre del patrocinador" maxlength="30" />
+    <input type="text" id="sponsorColor" placeholder="Color (ej: #ffd700, cyan, red)" maxlength="20" />
     <button class="btn-add-sponsor" onclick="addSponsor()">+ Agregar</button>
     <div class="sponsor-list" id="sponsorList"></div>
     <button class="btn-close-sponsor" onclick="closeSponsorModal()">Cerrar</button>
@@ -971,9 +794,7 @@ function doAuth() {
   }
 }
 
-document.getElementById('authPassword').addEventListener('keydown', e => {
-  if (e.key === 'Enter') doAuth();
-});
+
 
 function tradFirebaseError(code) {
   const map = {
@@ -1043,13 +864,10 @@ function listenLiveSessions() {
   sessionsListener = ref.on('value', snap => {
     const data  = snap.val() || {};
     const grid  = document.getElementById('sessionsGrid');
-    const authGrid = document.getElementById('authSessionsGrid');
     const items = Object.entries(data).filter(([k,v]) => v.live === true);
 
     if (!items.length) {
-      const noMsg = '<div class="no-sessions">No hay partidos en vivo ahora mismo.</div>';
-      grid.innerHTML = noMsg;
-      if (authGrid) authGrid.innerHTML = noMsg;
+      grid.innerHTML = '<div class="no-sessions">No hay partidos en vivo ahora mismo.</div>';
       return;
     }
 
@@ -1070,30 +888,8 @@ function listenLiveSessions() {
           <div class="session-score-preview" style="font-size:0.8em;">
             Sets: ${setsH} | ${setsG}
           </div>
-          <div class="session-meta-row">
-            <span class="session-owner">👤 ${escHtml(v.owner || 'Usuario')}</span>
-            <span class="session-viewers" id="viewers-${key}">👁 ...</span>
-          </div>
         </div>`;
     }).join('');
-    if (authGrid) authGrid.innerHTML = grid.innerHTML;
-
-    // Listen to viewer counts for each live session
-    items.forEach(([key]) => {
-      db.ref('sessions/' + key + '/viewers').on('value', snap => {
-        const count = snap.exists() ? Object.keys(snap.val()).length : 0;
-        // Update in both grids
-        ['viewers-'+key].forEach(id => {
-          const el = document.getElementById(id);
-          if (el) el.textContent = '👁 ' + count + (count === 1 ? ' espectador' : ' espectadores');
-        });
-        // Also update scoreboard corner if watching this session
-        if (currentGameId === key && !isOwner) {
-          const cl = document.getElementById('viewerCountLabel');
-          if (cl) cl.textContent = '👁 ' + count + (count === 1 ? ' espectador' : ' espectadores');
-        }
-      });
-    });
   });
 }
 
@@ -1161,12 +957,11 @@ function startNewGame() {
   gameTitle   = title;
 
   const state = buildState();
-  state.uid            = currentUser.uid;
-  state.owner          = currentUser.displayName || currentUser.email;
-  state.title          = title;
-  state.live           = true;
-  state.createdAt      = Date.now();
-  state.matchStartedAt = Date.now(); // used by all clients for the timer
+  state.uid       = currentUser.uid;
+  state.owner     = currentUser.displayName || currentUser.email;
+  state.title     = title;
+  state.live      = true;
+  state.createdAt = Date.now();
 
   const ref = db.ref('sessions').push(state);
   currentGameId = ref.key;
@@ -1189,21 +984,6 @@ function watchSession(key) {
   isOwner = false;
   enterMarcador(false);
   listenGame(key);
-  registerPresence(key);
-}
-
-function registerPresence(key) {
-  // Use a random viewer ID stored in sessionStorage
-  let viewerId = sessionStorage.getItem('viewerId');
-  if (!viewerId) {
-    viewerId = 'v_' + Math.random().toString(36).slice(2, 10);
-    sessionStorage.setItem('viewerId', viewerId);
-  }
-  const presRef = db.ref('sessions/' + key + '/viewers/' + viewerId);
-  presRef.set(true);
-  presRef.onDisconnect().remove();
-  // Remove when going back to lobby
-  window._presRef = presRef;
 }
 
 // ════════════════════════════════════════════════════
@@ -1220,17 +1000,6 @@ function listenGame(key) {
     if (!v) return;
     loadStateFrom(v);
     actualizarMarcador();
-    // Show winner screen to viewers when match finishes
-    if (!isOwner && v.finished && v.winner) {
-      if (!document.getElementById('winnerOverlay')) {
-        let detalle = [];
-        for (let i = 0; i <= setActual; i++) {
-          if (setsHome[i] > 0 || setsGuest[i] > 0) detalle.push(setsHome[i] + '-' + setsGuest[i]);
-        }
-        clearInterval(timerInterval);
-        mostrarPantallaGanador(v.winner, detalle.join('  |  '), v.duration || null);
-      }
-    }
   });
 }
 
@@ -1246,21 +1015,6 @@ function loadStateFrom(v) {
   enTiebreak   = v.enTiebreak   ?? false;
   gameTitle    = v.title        ?? '';
   historial    = v.historial    ?? [];
-
-  // Store matchStartedAt globally so the timer uses the same origin for all clients
-  if (v.matchStartedAt) {
-    const prev = window._matchStartedAt;
-    window._matchStartedAt = v.matchStartedAt;
-    // Restart timer if the start time changed (e.g. after reset)
-    if (prev !== v.matchStartedAt) {
-      clearInterval(timerInterval);
-      iniciarCronometro(v.matchStartedAt);
-    }
-  }
-
-  // Update owner corner label for viewers
-  const ol = document.getElementById('viewerOwnerLabel');
-  if (ol && v.owner) ol.textContent = '👤 ' + v.owner;
 }
 
 // ════════════════════════════════════════════════════
@@ -1273,8 +1027,6 @@ function enterMarcador(owner) {
   document.getElementById('ownerBotones').style.display  = owner ? 'flex' : 'none';
   document.getElementById('viewerBotones').style.display = owner ? 'none' : 'flex';
   document.getElementById('viewerBadge').style.display   = owner ? 'none' : 'block';
-  const vi = document.getElementById('viewerInfo');
-  if (vi) vi.style.display = owner ? 'none' : 'flex';
 
   ['nombreHome','nombreGuest'].forEach(id => {
     const el = document.getElementById(id);
@@ -1285,18 +1037,14 @@ function enterMarcador(owner) {
 
   actualizarMarcador();
   clearInterval(timerInterval);
-  // matchStartedAt is loaded from Firebase via loadStateFrom — use it if available
-  iniciarCronometro(window._matchStartedAt || null);
+  iniciarCronometro();
 }
 
 function irLobby() {
-  // Remove viewer presence
-  if (!isOwner && window._presRef) {
-    window._presRef.remove();
-    window._presRef = null;
+  // set live=false when owner leaves
+  if (isOwner && currentGameId) {
+    db.ref('sessions/'+currentGameId+'/live').set(false);
   }
-  // Owner just navigates away — partido stays live
-  // Use finalizarPartido() to explicitly end it
   if (sessionListener) {
     db.ref('sessions/'+sessionListener).off('value');
     sessionListener = null;
@@ -1307,17 +1055,8 @@ function irLobby() {
   showScreen('screenLobby');
 }
 
-function finalizarTransmision() {
-  if (!isOwner) return;
-  if (!confirm('¿Finalizar la transmisión? El partido dejará de aparecer en los en vivos.')) return;
-  if (currentGameId) {
-    db.ref('sessions/'+currentGameId+'/live').set(false);
-  }
-  irLobby();
-}
-
 // ════════════════════════════════════════════════════
-//  DEUCE / VENTAJA RECORDAR MAS ADELANTE AGREGAR OPCIÓN DE ORO DIRECTO
+//  HELPERS DE DEUCE / VENTAJA
 // ════════════════════════════════════════════════════
 function esDeuce()    { return idxHome === 3 && idxGuest === 3; }
 function hayVentaja() { return (idxHome===4&&idxGuest===3)||(idxHome===3&&idxGuest===4); }
@@ -1361,7 +1100,7 @@ function sumarTiebreak(equipo) {
   if (equipo==='home') { idxHome++;  animarScore('scoreHome'); }
   else                 { idxGuest++; animarScore('scoreGuest'); }
   saqueDerecha=!saqueDerecha;
-  if (idxHome>=7 || idxGuest>=7) {
+  if ((idxHome>=7||idxGuest>=7)&&Math.abs(idxHome-idxGuest)>=2) {
     ganarJuego(idxHome>idxGuest?'home':'guest');
   }
 }
@@ -1377,9 +1116,7 @@ function ganarJuego(equipo) {
 function verificarSet() {
   const h=setsHome[setActual], g=setsGuest[setActual];
   if (h===6&&g===6) { enTiebreak=true; idxHome=0; idxGuest=0; return; }
-  // Si hubo tiebreak (7-6) el set ya está cerrado sin necesidad de ventaja
-  const fueConTiebreak = (h===7&&g===6) || (h===6&&g===7);
-  if (fueConTiebreak || ((h>=6||g>=6)&&Math.abs(h-g)>=2)) {
+  if ((h>=6||g>=6)&&Math.abs(h-g)>=2) {
     flashPanel();
     // Contar sets ganados hasta ahora
     let sH=0, sG=0;
@@ -1403,43 +1140,33 @@ function terminarPartido(ganador) {
   for (let i=0;i<=setActual;i++) {
     if (setsHome[i]>0||setsGuest[i]>0) detalle.push(setsHome[i]+'-'+setsGuest[i]);
   }
-  // Calculate match duration from Firebase timestamp
-  const durSecs = window._matchStartedAt
-    ? Math.floor((Date.now() - window._matchStartedAt) / 1000)
-    : null;
-  const durStr = durSecs !== null
-    ? String(Math.floor(durSecs/3600)).padStart(2,'0') + ':' +
-      String(Math.floor((durSecs%3600)/60)).padStart(2,'0') + ':' +
-      String(durSecs%60).padStart(2,'0')
-    : document.getElementById('cronometro').textContent;
-
   if (isOwner && currentGameId) {
     db.ref('sessions/'+currentGameId).update({
       live: false,
       finished: true,
       winner: ganador,
-      duration: durStr,
       finishedAt: Date.now()
     });
   }
   clearInterval(timerInterval);
-  mostrarPantallaGanador(ganador, detalle.join('  |  '), durStr);
+  mostrarPantallaGanador(ganador, detalle.join('  |  '));
 }
 
-function mostrarPantallaGanador(ganador, detalle, duracion) {
+function mostrarPantallaGanador(ganador, detalle) {
   const overlay = document.createElement('div');
   overlay.id = 'winnerOverlay';
   overlay.style.cssText = 'position:fixed;inset:0;z-index:2000;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(0,0,0,0.92);backdrop-filter:blur(12px);gap:24px;padding:40px 20px;text-align:center;';
   const isHome = ganador === nombreHome;
   const color  = isHome ? '#ff3b3b' : '#00e676';
-  const waBtn = '<button onclick="compartirResultado()" style="font-family:Oswald,sans-serif;padding:13px 30px;font-size:1.1em;letter-spacing:3px;border:none;border-radius:12px;background:#25D366;color:white;cursor:pointer;text-transform:uppercase;">\u{1F4F2} WhatsApp</button>';
+  const waBtn = isOwner
+    ? '<button onclick="compartirResultado()" style="font-family:Oswald,sans-serif;padding:13px 30px;font-size:1.1em;letter-spacing:3px;border:none;border-radius:12px;background:#25D366;color:white;cursor:pointer;text-transform:uppercase;">\u{1F4F2} WhatsApp</button>'
+    : '';
   overlay.innerHTML =
     '<div id="wTrophy" style="font-size:4em;display:inline-block">\u{1F3C6}</div>' +
     '<div style="font-family:Oswald,sans-serif;font-size:1em;letter-spacing:6px;color:rgba(255,255,255,0.4);text-transform:uppercase;">\u{a1}Campe\u{f3}n!</div>' +
     '<div style="font-family:Oswald,sans-serif;font-size:3.2em;font-weight:700;color:' + color + ';letter-spacing:4px;text-shadow:0 0 30px ' + color + ',0 0 60px ' + color + ';text-transform:uppercase;">' + escHtml(ganador) + '</div>' +
     '<div style="font-family:Oswald,sans-serif;font-size:1.1em;letter-spacing:3px;color:rgba(255,255,255,0.5);">' + escHtml(gameTitle) + '</div>' +
     '<div style="font-family:Oswald,sans-serif;font-size:1.8em;letter-spacing:4px;color:#ffd700;">' + escHtml(detalle) + '</div>' +
-    (duracion ? '<div style="font-family:Rajdhani,sans-serif;font-size:1em;letter-spacing:3px;color:rgba(255,255,255,0.4);margin-top:-8px;">⏱ Duración: ' + escHtml(duracion) + '</div>' : '') +
     '<div style="display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-top:12px;">' +
       '<button onclick="document.getElementById(&quot;winnerOverlay&quot;).remove();irLobby()" style="font-family:Oswald,sans-serif;padding:13px 30px;font-size:1.1em;letter-spacing:3px;border:1px solid rgba(255,255,255,0.2);border-radius:12px;background:rgba(255,255,255,0.1);color:white;cursor:pointer;text-transform:uppercase;">\u{1F3E0} Volver al Lobby</button>' +
       waBtn +
@@ -1525,11 +1252,11 @@ function resetear() {
   if (!isOwner) return;
   if (!confirm('¿Resetear el marcador completamente?')) return;
   resetState();
-  historial = [];
-  window._matchStartedAt = Date.now();
+  historial=[];
   actualizarMarcador();
   guardarEstado();
-  // Timer will restart via loadStateFrom when Firebase echoes back
+  clearInterval(timerInterval);
+  iniciarCronometro();
 }
 
 function resetState() {
@@ -1545,11 +1272,10 @@ function resetState() {
 function buildState() {
   return {
     idxHome, idxGuest,
-    setsHome: [...setsHome], setsGuest: [...setsGuest],
+    setsHome:[...setsHome], setsGuest:[...setsGuest],
     setActual, saqueDerecha, enTiebreak,
     nombreHome, nombreGuest,
-    historial: historial.slice(-20),
-    matchStartedAt: window._matchStartedAt || Date.now(),
+    historial: historial.slice(-20), // keep last 20 snapshots
     updatedAt: Date.now()
   };
 }
@@ -1623,93 +1349,48 @@ function flashPanel() {
 // ════════════════════════════════════════════════════
 //  CRONÓMETRO
 // ════════════════════════════════════════════════════
-function iniciarCronometro(startTimestamp) {
-  // startTimestamp: Unix ms from Firebase (same for everyone)
-  // If not provided, use now (fallback)
-  inicio = startTimestamp ? new Date(startTimestamp) : new Date();
-  const cron = document.getElementById('cronometro');
+function iniciarCronometro() {
+  inicio=new Date();
+  const cron=document.getElementById('cronometro');
   clearInterval(timerInterval);
-  timerInterval = setInterval(() => {
-    const diff = Math.floor((new Date() - inicio) / 1000);
-    const h = String(Math.floor(diff / 3600)).padStart(2, '0');
-    const m = String(Math.floor((diff % 3600) / 60)).padStart(2, '0');
-    const s = String(diff % 60).padStart(2, '0');
-    cron.textContent = h + ':' + m + ':' + s;
-  }, 1000);
+  timerInterval=setInterval(()=>{
+    const diff=Math.floor((new Date()-inicio)/1000);
+    const h=String(Math.floor(diff/3600)).padStart(2,'0');
+    const m=String(Math.floor((diff%3600)/60)).padStart(2,'0');
+    const s=String(diff%60).padStart(2,'0');
+    cron.textContent=`${h}:${m}:${s}`;
+  },1000);
 }
 
 // ════════════════════════════════════════════════════
 //  WHATSAPP
 // ════════════════════════════════════════════════════
 function enviarWhatsApp() {
-  const cron  = document.getElementById('cronometro').textContent;
-  const ahora = new Date().toLocaleString('es-ES', { dateStyle:'short', timeStyle:'short' });
-
-  // Contar sets ganados
-  let sH = 0, sG = 0;
-  for (let i = 0; i <= setActual; i++) {
-    if (setsHome[i]  > setsGuest[i]) sH++;
-    else if (setsGuest[i] > setsHome[i]) sG++;
+  const cron=document.getElementById('cronometro').textContent;
+  let sH=0, sG=0;
+  for (let i=0;i<=setActual;i++) {
+    if (setsHome[i]>setsGuest[i]) sH++;
+    else if (setsGuest[i]>setsHome[i]) sG++;
   }
-  const ganador = sH > sG ? nombreHome : sG > sH ? nombreGuest : null;
-
-  // Separador visual
-  const sep  = '▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬';
-  const sep2 = '┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄';
-
-  // Construir marcador de sets
-  let detalleSets = '';
-  for (let i = 0; i <= setActual; i++) {
-    if (setsHome[i] > 0 || setsGuest[i] > 0) {
-      const setGanador = setsHome[i] > setsGuest[i] ? '🔴' : setsGuest[i] > setsHome[i] ? '🟢' : '⚪';
-      detalleSets += `${setGanador} Set ${i+1}:  *${setsHome[i]}* – *${setsGuest[i]}*\n`;
-    }
+  let txt=`🎾 *Partido de Pádel*\n📌 ${gameTitle}\n\n`;
+  txt+=`🏆 *${nombreHome}*: ${sH} sets\n🏆 *${nombreGuest}*: ${sG} sets\n\n`;
+  txt+=`📊 *Sets:*\n`;
+  for (let i=0;i<=setActual;i++) {
+    if (setsHome[i]>0||setsGuest[i]>0) txt+=`  Set ${i+1}: ${setsHome[i]} - ${setsGuest[i]}\n`;
   }
-
-  let txt = '';
-  txt += `🎾 *MARCADOR DE PÁDEL*\n`;
-  txt += `${sep}\n`;
-  if (gameTitle) txt += `📌 ${gameTitle}\n`;
-  txt += `📅 ${ahora}\n`;
-  txt += `${sep}\n\n`;
-
-  // Resultado principal
-  txt += `🏆 *RESULTADO FINAL*\n`;
-  txt += `${sep2}\n`;
-  txt += `🔴 *${nombreHome}*\n`;
-  txt += `🟢 *${nombreGuest}*\n`;
-  txt += `${sep2}\n`;
-  txt += `     ${sH}  —  ${sG}\n`;
-  txt += `${sep2}\n\n`;
-
-  // Detalle de sets
-  if (detalleSets) {
-    txt += `📊 *DETALLE DE SETS*\n`;
-    txt += detalleSets;
-    txt += `\n`;
-  }
-
-  // Ganador
-  if (ganador) {
-    txt += `🥇 *¡${ganador} gana el partido!*\n`;
-    txt += `\n`;
-  }
-
-  txt += `⏱️ Duración: *${cron}*\n`;
-  txt += `${sep}\n`;
-  txt += `_Enviado desde Marcador Pádel 🎾_`;
-
-  const num = prompt('Número WhatsApp (sin + ni espacios, ej: 50760000000):');
-  if (!num || !num.trim()) return;
-  window.open('https://wa.me/' + num.trim() + '?text=' + encodeURIComponent(txt), '_blank');
+  txt+=`\n⏱️ ${cron}\n_Marcador en vivo 🎾_`;
+  const num=prompt('Número WhatsApp (sin + ni espacios):');
+  if (!num||!num.trim()) return;
+  window.open(`https://wa.me/${num.trim()}?text=${encodeURIComponent(txt)}`, '_blank');
 }
+
 function toggleFullScreen() {
   if (!document.fullscreenElement) document.documentElement.requestFullscreen();
   else document.exitFullscreen();
 }
 
 // ════════════════════════════════════════════════════
-//  PATROCINADORES (EN UN FUTURO PODER AGREGARLO JAJAJA)
+//  PATROCINADORES
 // ════════════════════════════════════════════════════
 let sponsors = [];
 
@@ -1732,14 +1413,13 @@ function loadSponsors() {
 
 function renderSponsorBar() {
   const track = document.getElementById('sponsorTrack');
-  const items = [...sponsors, ...sponsors]; // duplicate for seamless loop
-  track.innerHTML = items.map(s => {
-    const content = s.imageUrl
-      ? `<img class="sponsor-img" src="${escHtml(s.imageUrl)}" alt="${escHtml(s.name||'')}"          onerror="this.style.display='none';this.nextSibling.style.display='inline'" />
-         <span class="sponsor-logo" style="color:${escHtml(s.color||'white')};display:none">${escHtml(s.name||'?')}</span>`
-      : `<span class="sponsor-logo" style="color:${escHtml(s.color||'white')}">${escHtml(s.name)}</span>`;
-    return `<div class="sponsor-item">${content}</div>`;
-  }).join('');
+  // Duplicate for seamless loop
+  const items = [...sponsors, ...sponsors];
+  track.innerHTML = items.map(s =>
+    `<div class="sponsor-item">
+       <span class="sponsor-logo" style="color:${escHtml(s.color||'white')}">${escHtml(s.name)}</span>
+     </div>`
+  ).join('');
 }
 
 function openSponsorModal() {
@@ -1752,28 +1432,20 @@ function closeSponsorModal() {
 
 function renderSponsorList() {
   const list = document.getElementById('sponsorList');
-  const real = sponsors.filter(s => !s.key.startsWith('default'));
-  list.innerHTML = real.map(s => {
-    const preview = s.imageUrl
-      ? `<img src="${escHtml(s.imageUrl)}" style="height:22px;object-fit:contain;vertical-align:middle;margin-right:6px;opacity:0.8" />`
-      : '';
-    return `<div class="sponsor-list-item">
-       ${preview}<span style="color:${escHtml(s.color||'white')}">${escHtml(s.name||'')}</span>
+  list.innerHTML = sponsors.filter(s=>!s.key.startsWith('default')).map(s =>
+    `<div class="sponsor-list-item">
+       <span style="color:${escHtml(s.color||'white')}">${escHtml(s.name)}</span>
        <button class="btn-remove-sponsor" onclick="removeSponsor('${s.key}')">✕</button>
-     </div>`;
-  }).join('') || '<div style="color:rgba(255,255,255,0.3);font-size:0.85em;">Sin patrocinadores aún.</div>';
+     </div>`
+  ).join('') || '<div style="color:rgba(255,255,255,0.3);font-size:0.85em;">Sin patrocinadores aún.</div>';
 }
 
 function addSponsor() {
-  const name     = document.getElementById('sponsorName').value.trim();
-  const imageUrl = document.getElementById('sponsorImage').value.trim();
-  const color    = document.getElementById('sponsorColor').value.trim() || '#ffffff';
-  if (!name && !imageUrl) return;
-  const entry = { name: name || '', color };
-  if (imageUrl) entry.imageUrl = imageUrl;
-  db.ref('sponsors').push(entry).then(() => {
+  const name  = document.getElementById('sponsorName').value.trim();
+  const color = document.getElementById('sponsorColor').value.trim() || '#ffffff';
+  if (!name) return;
+  db.ref('sponsors').push({ name, color }).then(() => {
     document.getElementById('sponsorName').value  = '';
-    document.getElementById('sponsorImage').value = '';
     document.getElementById('sponsorColor').value = '';
     renderSponsorList();
   });
@@ -1784,15 +1456,18 @@ function removeSponsor(key) {
 }
 
 // ════════════════════════════════════════════════════
-//  RETORNO
+//  UTILS
 // ════════════════════════════════════════════════════
 function escHtml(str) {
   return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
+// ════════════════════════════════════════════════════
+//  INIT
+// ════════════════════════════════════════════════════
 
 // ════════════════════════════════════════════════════
-//  GESTOS PARA EL ANILLO CONTROL
+//  GESTOS BLUETOOTH + DOBLE GESTO = UNDO
 // ════════════════════════════════════════════════════
 const GESTURE_ACTIONS = {
   sumar_home:   () => sumar('home'),
@@ -1804,50 +1479,19 @@ const GESTURE_ACTIONS = {
   ninguna:      () => {}
 };
 const GESTURE_LABELS = {
-  sumar_home:'+ HOME', restar_home:'− HOME',
-  sumar_guest:'+ GUEST', restar_guest:'− GUEST',
-  deshacer:'↩ UNDO', cambiarSaque:'⇄ SAQUE', ninguna:''
+  sumar_home:'+ HOME', restar_home:'\u2212 HOME',
+  sumar_guest:'+ GUEST', restar_guest:'\u2212 GUEST',
+  deshacer:'\u21a9 UNDO', cambiarSaque:'\u21c4 SAQUE', ninguna:''
 };
 
-let gestureMap = {
-  up:    'sumar_guest',
-  down:  'sumar_home',
-  left:  'ninguna',
-  right: 'ninguna'
-};
-
-function applyGestureMap() {
-  const up    = document.getElementById('gestureUp');
-  const down  = document.getElementById('gestureDown');
-  const left  = document.getElementById('gestureLeft');
-  const right = document.getElementById('gestureRight');
-  if (up)    up.value    = gestureMap.up;
-  if (down)  down.value  = gestureMap.down;
-  if (left)  left.value  = gestureMap.left;
-  if (right) right.value = gestureMap.right;
-}
-
-function openGestureModal() {
-  applyGestureMap();
-  document.getElementById('gestureModal').classList.add('open');
-}
-function closeGestureModal() {
-  gestureMap.up    = document.getElementById('gestureUp').value;
-  gestureMap.down  = document.getElementById('gestureDown').value;
-  gestureMap.left  = document.getElementById('gestureLeft').value;
-  gestureMap.right = document.getElementById('gestureRight').value;
-  localStorage.setItem('gestureUp',    gestureMap.up);
-  localStorage.setItem('gestureDown',  gestureMap.down);
-  localStorage.setItem('gestureLeft',  gestureMap.left);
-  localStorage.setItem('gestureRight', gestureMap.right);
-  document.getElementById('gestureModal').classList.remove('open');
-}
+let gestureMap = { up:'sumar_guest', down:'sumar_home', left:'ninguna', right:'ninguna' };
 
 let indicatorTimer = null;
 function showGestureIndicator(action) {
   const label = GESTURE_LABELS[action];
   if (!label) return;
   const el = document.getElementById('gestureIndicator');
+  if (!el) return;
   el.textContent = label;
   el.classList.add('show');
   clearTimeout(indicatorTimer);
@@ -1855,36 +1499,49 @@ function showGestureIndicator(action) {
 }
 
 let lastWheelTime = 0;
+let lastWheelDirection = null;
+let lastWheelActionTime = 0;
+
 window.addEventListener('wheel', e => {
   const screen = document.getElementById('screenMarcador');
   if (!screen || !screen.classList.contains('active')) return;
-  if (!isOwner) return; // espectadores no pueden modificar el marcador
+  if (!isOwner) return;
   e.preventDefault();
   const now = Date.now();
   if (now - lastWheelTime < 350) return;
 
-  // Determine dominant axis
   const absX = Math.abs(e.deltaX);
   const absY = Math.abs(e.deltaY);
-  if (absX < 5 && absY < 5) return; // ignore tiny movements
+  if (absX < 5 && absY < 5) return;
 
   let action;
   if (absX > absY) {
-    // Horizontal scroll
     action = e.deltaX > 0 ? gestureMap.right : gestureMap.left;
   } else {
-    // Vertical scroll
     action = e.deltaY < 0 ? gestureMap.up : gestureMap.down;
   }
 
+  // Doble gesto en la misma dirección en menos de 600ms = UNDO
+  const timeSinceLastAction = now - lastWheelActionTime;
+  if (action === lastWheelDirection && timeSinceLastAction < 600) {
+    lastWheelDirection = null;
+    lastWheelActionTime = now;
+    lastWheelTime = now;
+    deshacer();
+    showGestureIndicator('deshacer');
+    return;
+  }
+
   lastWheelTime = now;
+  lastWheelDirection = action;
+  lastWheelActionTime = now;
   if (GESTURE_ACTIONS[action]) {
     GESTURE_ACTIONS[action]();
     showGestureIndicator(action);
   }
 }, { passive: false });
 
-// Intercept Enter/Space to trigger UNDO instead of activating focused button
+// Enter/Space = UNDO
 window.addEventListener('keydown', e => {
   const screen = document.getElementById('screenMarcador');
   if (!screen || !screen.classList.contains('active')) return;
@@ -1896,24 +1553,19 @@ window.addEventListener('keydown', e => {
   }
 });
 
-// Touch swipe support (iPhone)
+// Touch swipe
 let touchStartY = 0;
-window.addEventListener('touchstart', e => {
-  touchStartY = e.touches[0].clientY;
-}, { passive: true });
-
+window.addEventListener('touchstart', e => { touchStartY = e.touches[0].clientY; }, { passive: true });
 window.addEventListener('touchend', e => {
   const screen = document.getElementById('screenMarcador');
   if (!screen || !screen.classList.contains('active')) return;
   if (!isOwner) return;
   const diff = touchStartY - e.changedTouches[0].clientY;
-  if (Math.abs(diff) < 40) return; // mínimo 40px de swipe
+  if (Math.abs(diff) < 40) return;
   const action = diff > 0 ? gestureMap.up : gestureMap.down;
-  if (GESTURE_ACTIONS[action]) {
-    GESTURE_ACTIONS[action]();
-    showGestureIndicator(action);
-  }
+  if (GESTURE_ACTIONS[action]) { GESTURE_ACTIONS[action](); showGestureIndicator(action); }
 }, { passive: true });
+
 
 // ════════════════════════════════════════════════════
 //  INIT
@@ -1923,9 +1575,10 @@ document.getElementById('tabSignup').addEventListener('click',      () => setAut
 document.getElementById('authBtn').addEventListener('click',        () => doAuth());
 document.getElementById('authPassword').addEventListener('keydown', e => { if (e.key === 'Enter') doAuth(); });
 
-renderLobbyAuth(); // show buttons immediately before Firebase responds
+renderLobbyAuth();
 listenLiveSessions();
 loadSponsors();
 </script>
+<div class="gesture-indicator" id="gestureIndicator"></div>
 </body>
 </html>
