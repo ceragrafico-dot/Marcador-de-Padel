@@ -564,6 +564,201 @@ body, html {
   border: 1px solid rgba(255,255,255,0.15);
 }
 .gesture-indicator.show { opacity: 1; }
+
+
+/* ══════════════════════════════════════════
+   PANTALLA: SELECTOR DE DEPORTE
+══════════════════════════════════════════ */
+#screenSports {
+  align-items: center;
+  justify-content: center;
+  padding: 36px 20px calc(var(--sponsor-h) + 30px);
+  gap: 28px;
+}
+.sports-shell {
+  width: 100%;
+  max-width: 980px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 28px;
+}
+.sports-topbar {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 10px 4px;
+}
+.sports-user {
+  color: rgba(255,255,255,.55);
+  font-size: .95em;
+  letter-spacing: 1px;
+}
+.sports-logout {
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: 1px solid rgba(255,59,59,.3);
+  background: rgba(255,59,59,.12);
+  color: var(--home);
+  font-family: 'Oswald', sans-serif;
+  letter-spacing: 2px;
+  cursor: pointer;
+}
+.sports-heading { text-align: center; }
+.sports-kicker {
+  color: var(--cyan);
+  font-family: 'Oswald', sans-serif;
+  font-size: .78em;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.sports-heading h1 {
+  font-family: 'Oswald', sans-serif;
+  font-size: clamp(2.2rem, 6vw, 4.5rem);
+  line-height: 1;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+.sports-heading p {
+  margin-top: 12px;
+  color: rgba(255,255,255,.4);
+  font-size: 1.05em;
+  letter-spacing: 1px;
+}
+.sports-grid {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+.sport-card {
+  min-height: 220px;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: flex-start;
+  padding: 24px;
+  border-radius: 22px;
+  border: 1px solid rgba(255,255,255,.09);
+  background: linear-gradient(155deg, rgba(255,255,255,.08), rgba(255,255,255,.025));
+  color: white;
+  cursor: pointer;
+  text-align: left;
+  transition: transform .22s ease, border-color .22s ease, background .22s ease;
+}
+.sport-card::before {
+  content: '';
+  position: absolute;
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  top: -55px;
+  right: -50px;
+  background: currentColor;
+  opacity: .07;
+  filter: blur(2px);
+}
+.sport-card:hover {
+  transform: translateY(-6px);
+  border-color: rgba(255,255,255,.28);
+  background: linear-gradient(155deg, rgba(255,255,255,.13), rgba(255,255,255,.04));
+}
+.sport-card.padel { color: #00e676; }
+.sport-card.football { color: #42a5f5; }
+.sport-card.basket { color: #ff9800; }
+.sport-card.tennis { color: #d4ff38; }
+.sport-icon {
+  position: absolute;
+  top: 24px;
+  left: 24px;
+  font-size: 3.2rem;
+  filter: grayscale(.1);
+}
+.sport-status {
+  position: absolute;
+  top: 20px;
+  right: 18px;
+  padding: 5px 9px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,.12);
+  background: rgba(0,0,0,.22);
+  color: rgba(255,255,255,.55);
+  font-family: 'Oswald', sans-serif;
+  font-size: .62em;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+}
+.sport-card.padel .sport-status {
+  color: #00e676;
+  border-color: rgba(0,230,118,.25);
+  background: rgba(0,230,118,.08);
+}
+.sport-name {
+  color: white;
+  font-family: 'Oswald', sans-serif;
+  font-size: 1.65em;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+.sport-description {
+  margin-top: 5px;
+  color: rgba(255,255,255,.38);
+  font-family: 'Rajdhani', sans-serif;
+  font-size: .92em;
+}
+.sport-coming { opacity: .75; }
+.sport-coming:hover { opacity: 1; }
+.btn-sports-back {
+  align-self: flex-start;
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.1);
+  color: rgba(255,255,255,.7);
+  border-radius: 9px;
+  padding: 8px 14px;
+  font-family: 'Oswald', sans-serif;
+  letter-spacing: 1.5px;
+  cursor: pointer;
+  margin-bottom: -10px;
+}
+.btn-sports-back:hover { background: rgba(255,255,255,.1); color: white; }
+.sport-toast {
+  position: fixed;
+  left: 50%;
+  top: 28px;
+  transform: translate(-50%, -20px);
+  opacity: 0;
+  pointer-events: none;
+  z-index: 1500;
+  padding: 11px 18px;
+  border-radius: 12px;
+  background: rgba(5,5,20,.95);
+  border: 1px solid rgba(255,255,255,.12);
+  box-shadow: 0 10px 30px rgba(0,0,0,.4);
+  font-family: 'Oswald', sans-serif;
+  letter-spacing: 1.5px;
+  transition: all .2s ease;
+}
+.sport-toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+@media (max-width: 800px) {
+  .sports-grid { grid-template-columns: repeat(2, 1fr); }
+  .sport-card { min-height: 190px; }
+}
+@media (max-width: 480px) {
+  #screenSports { justify-content: flex-start; padding-top: 24px; }
+  .sports-grid { grid-template-columns: 1fr; }
+  .sport-card { min-height: 142px; }
+  .sport-icon { font-size: 2.5rem; }
+  .sports-topbar { align-items: flex-start; }
+  .sports-user { max-width: 210px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+}
+
 </style>
 </head>
 <body>
@@ -585,8 +780,60 @@ body, html {
   </div>
 </div>
 
-<!-- ══ SCREEN: LOBBY ══════════════════════════════ -->
+
+<!-- ══ SCREEN: SELECTOR DE DEPORTE ═══════════════ -->
+<div id="screenSports" class="screen">
+  <div class="sports-shell">
+    <div class="sports-topbar">
+      <div class="sports-user" id="sportsUser">👤 Usuario</div>
+      <button class="sports-logout" onclick="doLogout()">Salir</button>
+    </div>
+
+    <div class="sports-heading">
+      <div class="sports-kicker">Sistema multideporte</div>
+      <h1>¿Qué vamos a jugar hoy?</h1>
+      <p>Selecciona un deporte para entrar a su marcador.</p>
+    </div>
+
+    <div class="sports-grid">
+      <button class="sport-card padel" onclick="selectSport('padel')">
+        <span class="sport-icon">🎾</span>
+        <span class="sport-status">Disponible</span>
+        <span class="sport-name">Pádel</span>
+        <span class="sport-description">Marcador en vivo · sets · saque · espectadores</span>
+      </button>
+
+      <button class="sport-card football sport-coming" onclick="selectSport('futbol')">
+        <span class="sport-icon">⚽</span>
+        <span class="sport-status">Próximamente</span>
+        <span class="sport-name">Fútbol</span>
+        <span class="sport-description">Módulo en preparación</span>
+      </button>
+
+      <button class="sport-card basket sport-coming" onclick="selectSport('basket')">
+        <span class="sport-icon">🏀</span>
+        <span class="sport-status">Próximamente</span>
+        <span class="sport-name">Basket</span>
+        <span class="sport-description">Módulo en preparación</span>
+      </button>
+
+      <button class="sport-card tennis sport-coming" onclick="selectSport('tenis')">
+        <span class="sport-icon">🎾</span>
+        <span class="sport-status">Próximamente</span>
+        <span class="sport-name">Tenis</span>
+        <span class="sport-description">Módulo en preparación</span>
+      </button>
+    </div>
+  </div>
+</div>
+<div id="sportToast" class="sport-toast"></div>
+
+<!-- ══ SCREEN: LOBBY PÁDEL ═══════════════════════ -->
 <div id="screenLobby" class="screen">
+
+  <div style="width:100%;max-width:680px;">
+    <button class="btn-sports-back" onclick="showSportsScreen()">← Deportes</button>
+  </div>
 
   <div class="lobby-header">
     <h1>🎾 Marcador <span>Pádel</span></h1>
@@ -780,14 +1027,14 @@ function doAuth() {
 
   if (authMode === 'login') {
     auth.signInWithEmailAndPassword(email, pass)
-      .then(() => showScreen('screenLobby'))
+      .then(() => showScreen('screenSports'))
       .catch(e => { errEl.textContent = tradFirebaseError(e.code); });
   } else {
     if (!name) { errEl.textContent = 'Ingresa un nombre de usuario'; return; }
     auth.createUserWithEmailAndPassword(email, pass)
       .then(cred => {
         return cred.user.updateProfile({ displayName: name }).then(() => {
-          showScreen('screenLobby');
+          showScreen('screenSports');
         });
       })
       .catch(e => { errEl.textContent = tradFirebaseError(e.code); });
@@ -814,8 +1061,9 @@ function tradFirebaseError(code) {
 auth.onAuthStateChanged(user => {
   currentUser = user;
   if (user) {
-    // Already logged in — go straight to lobby
-    showScreen('screenLobby');
+    // Usuario autenticado — mostrar selector de deporte
+    showScreen('screenSports');
+    renderSportsUser();
     renderLobbyAuth();
     document.getElementById('newGamePanel').style.display = 'flex';
     document.getElementById('savedGamesSection').style.display = 'block';
@@ -829,6 +1077,55 @@ auth.onAuthStateChanged(user => {
     document.getElementById('savedGamesList').innerHTML = '';
   }
 });
+
+function renderSportsUser() {
+  const el = document.getElementById('sportsUser');
+  if (!el) return;
+  el.textContent = currentUser
+    ? '👤 ' + (currentUser.displayName || currentUser.email)
+    : '👤 Usuario';
+}
+
+function showSportsScreen() {
+  if (!currentUser) {
+    showScreen('screenAuth');
+    return;
+  }
+  renderSportsUser();
+  showScreen('screenSports');
+}
+
+let sportToastTimer = null;
+function showSportToast(message) {
+  const el = document.getElementById('sportToast');
+  if (!el) return;
+  el.textContent = message;
+  el.classList.add('show');
+  clearTimeout(sportToastTimer);
+  sportToastTimer = setTimeout(() => el.classList.remove('show'), 2200);
+}
+
+function selectSport(sport) {
+  if (!currentUser) {
+    showScreen('screenAuth');
+    return;
+  }
+
+  if (sport === 'padel') {
+    renderLobbyAuth();
+    document.getElementById('newGamePanel').style.display = 'flex';
+    document.getElementById('savedGamesSection').style.display = 'block';
+    showScreen('screenLobby');
+    return;
+  }
+
+  const labels = {
+    futbol: 'Fútbol',
+    basket: 'Basket',
+    tenis: 'Tenis'
+  };
+  showSportToast('🚧 ' + (labels[sport] || 'Este deporte') + ' — módulo próximamente');
+}
 
 function renderLobbyAuth() {
   const area = document.getElementById('lobbyAuthArea');
