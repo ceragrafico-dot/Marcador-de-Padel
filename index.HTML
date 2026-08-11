@@ -698,6 +698,11 @@ body, html {
   border-color: rgba(0,230,118,.25);
   background: rgba(0,230,118,.08);
 }
+.sport-card.tennis .sport-status {
+  color: #d4ff38;
+  border-color: rgba(212,255,56,.28);
+  background: rgba(212,255,56,.08);
+}
 .sport-name {
   color: white;
   font-family: 'Oswald', sans-serif;
@@ -766,7 +771,7 @@ body, html {
 <!-- ══ SCREEN: AUTH ═══════════════════════════════ -->
 <div id="screenAuth" class="screen active">
   <div id="authBox">
-    <h2>🎾 Marcador <span>Pádel</span></h2>
+    <h2>🏆 Marcador <span>Deportes</span></h2>
     <div class="auth-tabs">
       <button class="auth-tab active" id="tabLogin"  >Iniciar Sesión</button>
       <button class="auth-tab"        id="tabSignup" >Registrarse</button>
@@ -817,11 +822,11 @@ body, html {
         <span class="sport-description">Módulo en preparación</span>
       </button>
 
-      <button class="sport-card tennis sport-coming" onclick="selectSport('tenis')">
+      <button class="sport-card tennis" onclick="selectSport('tenis')">
         <span class="sport-icon">🎾</span>
-        <span class="sport-status">Próximamente</span>
+        <span class="sport-status">Disponible</span>
         <span class="sport-name">Tenis</span>
-        <span class="sport-description">Módulo en preparación</span>
+        <span class="sport-description">Marcador en vivo · sets · saque · espectadores</span>
       </button>
     </div>
   </div>
@@ -836,8 +841,8 @@ body, html {
   </div>
 
   <div class="lobby-header">
-    <h1>🎾 Marcador <span>Pádel</span></h1>
-    <div class="lobby-subtitle">Sistema de marcador en vivo</div>
+    <h1 id="moduleHeading">🎾 Marcador <span>Pádel</span></h1>
+    <div class="lobby-subtitle" id="moduleSubtitle">Sistema de marcador en vivo · Pádel</div>
   </div>
 
   <!-- User bar / auth -->
@@ -847,7 +852,7 @@ body, html {
 
   <!-- New game (only when logged in) -->
   <div id="newGamePanel" class="new-game-panel" style="display:none;">
-    <h3>➕ Nuevo Partido</h3>
+    <h3 id="newGameHeading">➕ Nuevo Partido de Pádel</h3>
     <input type="text" id="gameTitle" placeholder="Título del partido (ej: Final Club Copa 2025)" maxlength="60" />
     <input type="text" id="gameTeamHome"  placeholder="Nombre equipo HOME" maxlength="24" />
     <input type="text" id="gameTeamGuest" placeholder="Nombre equipo GUEST" maxlength="24" />
@@ -995,6 +1000,36 @@ let nombreHome="HOME", nombreGuest="GUEST";
 let inicio=null, timerInterval=null;
 let gameTitle = "";
 
+// Deporte activo. Los partidos antiguos sin `sport` se consideran Pádel.
+let activeSport = 'padel';
+let lastSessionsData = {};
+let savedGamesRef = null;
+let savedGamesListener = null;
+
+const SPORT_CONFIG = {
+  padel: { name: 'Pádel', icon: '🎾', teamHome: 'HOME', teamGuest: 'GUEST' },
+  tenis: { name: 'Tenis', icon: '🎾', teamHome: 'JUGADOR 1', teamGuest: 'JUGADOR 2' }
+};
+
+function normalizeSport(v) {
+  return (v && v.sport) ? v.sport : 'padel';
+}
+
+function applySportUI() {
+  const cfg = SPORT_CONFIG[activeSport] || SPORT_CONFIG.padel;
+  const heading = document.getElementById('moduleHeading');
+  const subtitle = document.getElementById('moduleSubtitle');
+  const newHeading = document.getElementById('newGameHeading');
+  const homeInput = document.getElementById('gameTeamHome');
+  const guestInput = document.getElementById('gameTeamGuest');
+  if (heading) heading.innerHTML = `${cfg.icon} Marcador <span>${cfg.name}</span>`;
+  if (subtitle) subtitle.textContent = `Sistema de marcador en vivo · ${cfg.name}`;
+  if (newHeading) newHeading.textContent = `➕ Nuevo Partido de ${cfg.name}`;
+  if (homeInput) homeInput.placeholder = activeSport === 'tenis' ? 'Nombre jugador 1' : 'Nombre equipo HOME';
+  if (guestInput) guestInput.placeholder = activeSport === 'tenis' ? 'Nombre jugador 2' : 'Nombre equipo GUEST';
+}
+
+
 // ════════════════════════════════════════════════════
 //  PANTALLAS
 // ════════════════════════════════════════════════════
@@ -1111,18 +1146,21 @@ function selectSport(sport) {
     return;
   }
 
-  if (sport === 'padel') {
+  if (sport === 'padel' || sport === 'tenis') {
+    activeSport = sport;
+    applySportUI();
     renderLobbyAuth();
     document.getElementById('newGamePanel').style.display = 'flex';
     document.getElementById('savedGamesSection').style.display = 'block';
+    renderLiveSessions(lastSessionsData);
+    listenSavedGames();
     showScreen('screenLobby');
     return;
   }
 
   const labels = {
     futbol: 'Fútbol',
-    basket: 'Basket',
-    tenis: 'Tenis'
+    basket: 'Basket'
   };
   showSportToast('🚧 ' + (labels[sport] || 'Este deporte') + ' — módulo próximamente');
 }
@@ -1155,38 +1193,45 @@ function doLogout() {
 // ════════════════════════════════════════════════════
 //  SESIONES EN VIVO (visible para todos)
 // ════════════════════════════════════════════════════
+function renderLiveSessions(data) {
+  const grid = document.getElementById('sessionsGrid');
+  if (!grid) return;
+  const items = Object.entries(data || {}).filter(([k,v]) =>
+    v.live === true && normalizeSport(v) === activeSport
+  );
+
+  if (!items.length) {
+    grid.innerHTML = '<div class="no-sessions">No hay partidos en vivo ahora mismo.</div>';
+    return;
+  }
+
+  grid.innerHTML = items.map(([key, v]) => {
+    const h = v.idxHome || 0;
+    const g = v.idxGuest || 0;
+    const pd = ["0","15","30","40","AD","W"];
+    const scoreText = v.enTiebreak ? `${h} - ${g}` : `${pd[h]} - ${pd[g]}`;
+    const setsH = (v.setsHome || [0,0,0]).slice(0, (v.setActual||0)+1).join(' ');
+    const setsG = (v.setsGuest || [0,0,0]).slice(0, (v.setActual||0)+1).join(' ');
+    return `
+      <div class="session-card" onclick="watchSession('${key}')">
+        <div class="session-label"><span class="session-live-dot"></span>EN VIVO</div>
+        <div class="session-title">${escHtml(v.title || 'Partido')}</div>
+        <div class="session-score-preview">
+          ${escHtml(v.nombreHome||'HOME')} ${scoreText} ${escHtml(v.nombreGuest||'GUEST')}
+        </div>
+        <div class="session-score-preview" style="font-size:0.8em;">
+          Sets: ${setsH} | ${setsG}
+        </div>
+      </div>`;
+  }).join('');
+}
+
 function listenLiveSessions() {
   const ref = db.ref('sessions');
   if (sessionsListener) ref.off('value', sessionsListener);
   sessionsListener = ref.on('value', snap => {
-    const data  = snap.val() || {};
-    const grid  = document.getElementById('sessionsGrid');
-    const items = Object.entries(data).filter(([k,v]) => v.live === true);
-
-    if (!items.length) {
-      grid.innerHTML = '<div class="no-sessions">No hay partidos en vivo ahora mismo.</div>';
-      return;
-    }
-
-    grid.innerHTML = items.map(([key, v]) => {
-      const h = v.idxHome  || 0;
-      const g = v.idxGuest || 0;
-      const pd = ["0","15","30","40","AD","W"];
-      const scoreText = v.enTiebreak ? `${h} - ${g}` : `${pd[h]} - ${pd[g]}`;
-      const setsH = (v.setsHome  || [0,0,0]).slice(0, (v.setActual||0)+1).join(' ');
-      const setsG = (v.setsGuest || [0,0,0]).slice(0, (v.setActual||0)+1).join(' ');
-      return `
-        <div class="session-card" onclick="watchSession('${key}')">
-          <div class="session-label"><span class="session-live-dot"></span>EN VIVO</div>
-          <div class="session-title">${escHtml(v.title || 'Partido')}</div>
-          <div class="session-score-preview">
-            ${escHtml(v.nombreHome||'HOME')} ${scoreText} ${escHtml(v.nombreGuest||'GUEST')}
-          </div>
-          <div class="session-score-preview" style="font-size:0.8em;">
-            Sets: ${setsH} | ${setsG}
-          </div>
-        </div>`;
-    }).join('');
+    lastSessionsData = snap.val() || {};
+    renderLiveSessions(lastSessionsData);
   });
 }
 
@@ -1195,14 +1240,20 @@ function listenLiveSessions() {
 // ════════════════════════════════════════════════════
 function listenSavedGames() {
   if (!currentUser) return;
-  const ref = db.ref('sessions').orderByChild('uid').equalTo(currentUser.uid);
-  ref.on('value', snap => {
+  if (savedGamesRef && savedGamesListener) {
+    savedGamesRef.off('value', savedGamesListener);
+  }
+  savedGamesRef = db.ref('sessions').orderByChild('uid').equalTo(currentUser.uid);
+  savedGamesListener = savedGamesRef.on('value', snap => {
     const data = snap.val() || {};
     const list = document.getElementById('savedGamesList');
-    const games = Object.entries(data).sort((a,b) => (b[1].createdAt||0)-(a[1].createdAt||0));
+    const games = Object.entries(data)
+      .filter(([key, v]) => normalizeSport(v) === activeSport)
+      .sort((a,b) => (b[1].createdAt||0)-(a[1].createdAt||0));
 
     if (!games.length) {
-      list.innerHTML = '<div class="no-sessions">Aún no tienes partidos guardados.</div>';
+      const name = (SPORT_CONFIG[activeSport] || SPORT_CONFIG.padel).name;
+      list.innerHTML = `<div class="no-sessions">Aún no tienes partidos de ${name} guardados.</div>`;
       return;
     }
 
@@ -1245,8 +1296,9 @@ function resumeGame(key) {
 function startNewGame() {
   if (!currentUser) { showScreen('screenAuth'); return; }
   const title = document.getElementById('gameTitle').value.trim() || 'Partido';
-  const nh    = document.getElementById('gameTeamHome').value.trim()  || 'HOME';
-  const ng    = document.getElementById('gameTeamGuest').value.trim() || 'GUEST';
+  const cfg   = SPORT_CONFIG[activeSport] || SPORT_CONFIG.padel;
+  const nh    = document.getElementById('gameTeamHome').value.trim()  || cfg.teamHome;
+  const ng    = document.getElementById('gameTeamGuest').value.trim() || cfg.teamGuest;
 
   resetState();
   nombreHome  = nh;
@@ -1255,6 +1307,7 @@ function startNewGame() {
 
   const state = buildState();
   state.uid       = currentUser.uid;
+  state.sport     = activeSport;
   state.owner     = currentUser.displayName || currentUser.email;
   state.title     = title;
   state.live      = true;
@@ -1301,6 +1354,8 @@ function listenGame(key) {
 }
 
 function loadStateFrom(v) {
+  activeSport  = normalizeSport(v);
+  applySportUI();
   idxHome      = v.idxHome      ?? 0;
   idxGuest     = v.idxGuest     ?? 0;
   setsHome     = v.setsHome     ?? [0,0,0];
@@ -1349,6 +1404,9 @@ function irLobby() {
   clearInterval(timerInterval);
   currentGameId = null;
   isOwner = false;
+  applySportUI();
+  renderLiveSessions(lastSessionsData);
+  listenSavedGames();
   showScreen('screenLobby');
 }
 
@@ -1413,7 +1471,8 @@ function ganarJuego(equipo) {
 function verificarSet() {
   const h=setsHome[setActual], g=setsGuest[setActual];
   if (h===6&&g===6) { enTiebreak=true; idxHome=0; idxGuest=0; return; }
-  if ((h>=6||g>=6)&&Math.abs(h-g)>=2) {
+  const fueConTiebreak = (h===7&&g===6) || (h===6&&g===7);
+  if (fueConTiebreak || ((h>=6||g>=6)&&Math.abs(h-g)>=2)) {
     flashPanel();
     // Contar sets ganados hasta ahora
     let sH=0, sG=0;
@@ -1560,7 +1619,8 @@ function resetState() {
   idxHome=0; idxGuest=0;
   setsHome=[0,0,0]; setsGuest=[0,0,0];
   setActual=0; saqueDerecha=true; enTiebreak=false; historial=[];
-  nombreHome='HOME'; nombreGuest='GUEST';
+  const cfg = SPORT_CONFIG[activeSport] || SPORT_CONFIG.padel;
+  nombreHome=cfg.teamHome; nombreGuest=cfg.teamGuest;
 }
 
 // ════════════════════════════════════════════════════
@@ -1568,6 +1628,7 @@ function resetState() {
 // ════════════════════════════════════════════════════
 function buildState() {
   return {
+    sport: activeSport,
     idxHome, idxGuest,
     setsHome:[...setsHome], setsGuest:[...setsGuest],
     setActual, saqueDerecha, enTiebreak,
@@ -1700,7 +1761,7 @@ function loadSponsors() {
     if (!sponsors.length) {
       sponsors = [
         {key:'default1', name:'Tu Marca Aquí', color:'#ffd700'},
-        {key:'default2', name:'@ESSENZAWOW',  color:'#00e5ff'},
+        {key:'default2', name:'Patrocinador',  color:'#00e5ff'},
         {key:'default3', name:'Club Pádel',    color:'#ff3b3b'},
       ];
     }
@@ -1872,6 +1933,7 @@ document.getElementById('tabSignup').addEventListener('click',      () => setAut
 document.getElementById('authBtn').addEventListener('click',        () => doAuth());
 document.getElementById('authPassword').addEventListener('keydown', e => { if (e.key === 'Enter') doAuth(); });
 
+applySportUI();
 renderLobbyAuth();
 listenLiveSessions();
 loadSponsors();
